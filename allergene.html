@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primel Eiscafé - Allergene</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: #f0f2f5;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
+        }
+        
+        /* ===== DRUCKEN ===== */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0.8cm;
+            }
+            
+            body {
+                padding: 0;
+                background: white;
+                overflow: visible;
+                height: auto;
+            }
+            
+            .container {
+                max-width: 100%;
+                height: auto;
+                box-shadow: none;
+                border-radius: 0;
+                overflow: visible;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .content {
+                overflow: visible;
+                height: auto;
+            }
+            
+            .page {
+                overflow: visible;
+                height: auto;
+            }
+            
+            .table-container {
+                overflow: visible;
+                height: auto;
+            }
+            
+            table {
+                page-break-after: auto;
+                border: 1px solid #000;
+                font-size: 7pt;
+                table-layout: fixed;
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+                height: 0.5cm;
+            }
+            
+            thead {
+                display: table-header-group;
+            }
+            
+            tbody {
+                display: table-row-group;
+            }
+            
+            th {
+                background: #34495e !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 3px 1px;
+                font-size: 7pt;
+                height: 0.7cm;
+            }
+            
+            td {
+                border: 1px solid #000 !important;
+                padding: 2px 1px;
+                font-size: 7pt;
+                height: 0.5cm;
+                color: black !important;
+            }
+            
+            .page-header {
+                padding: 4px 8px;
+                margin-bottom: 5px;
+            }
+            
+            .page-header h2 {
+                font-size: 10pt;
+                color: black;
+            }
+            
+            .logo {
+                font-size: 12pt;
+            }
+            
+            .zusatzstoffe-liste {
+                font-size: 7pt;
+            }
+        }
+        
+        /* ===== BILDSCHIRM ===== */
+        .container {
+            max-width: 1400px;
+            height: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Header mit Logo */
+        .app-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3498db;
+            font-weight: bold;
+            font-size: 1.4em;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* Seiten-Header (nicht fix) */
+        .page-header {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #3498db;
+            flex-shrink: 0;
+        }
+        
+        .page-header h2 {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .page-header .subtitle {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        .page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        /* Table Container - scrollbar */
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            background: white;
+            min-height: 0;
+            position: relative;
+        }
+        
+        /* Tabelle mit fixiertem Kopf */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #34495e;
+            font-size: 0.75em;
+            table-layout: fixed;
+        }
+        
+        /* Fixierter Tabellenkopf */
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid #2c3e50;
+            padding: 8px 2px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Spaltenbreiten */
+        th:nth-child(1) { width: 100px; } /* Produkt */
+        th:nth-child(2) { width: 45px; }  /* Gluten */
+        th:nth-child(3) { width: 45px; }  /* Schalenfrüchte */
+        th:nth-child(4) { width: 40px; }  /* Fisch */
+        th:nth-child(5) { width: 40px; }  /* Eier */
+        th:nth-child(6) { width: 45px; }  /* Krebstiere */
+        th:nth-child(7) { width: 45px; }  /* Weichtiere */
+        th:nth-child(8) { width: 45px; }  /* Erdnüsse */
+        th:nth-child(9) { width: 40px; }  /* Sesam */
+        th:nth-child(10) { width: 40px; } /* Soja */
+        th:nth-child(11) { width: 45px; } /* Lupine */
+        th:nth-child(12) { width: 45px; } /* Sellerie */
+        th:nth-child(13) { width: 40px; } /* Senf */
+        th:nth-child(14) { width: 70px; } /* Milch & Laktose */
+        th:nth-child(15) { width: 45px; } /* Sulfite */
+        th:nth-child(16) { width: 60px; } /* Zusatzstoffe */
+        
+        td {
+            padding: 5px 2px;
+            border: 1px solid #bdc3c7;
+            text-align: center;
+            vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        td:first-child {
+            text-align: left;
+            padding-left: 8px;
+            font-weight: 500;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tr.category-row {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr.category-row td {
+            background: #3498db;
+            color: white;
+            border: 1px solid #2980b9;
+            padding: 8px 5px;
+            font-size: 0.9em;
+        }
+        
+        tr.category-row td:first-child {
+            text-align: center;
+        }
+        
+        .x-mark {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .zusatz-nr {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        /* Footer mit Zusatzstoffe-Liste */
+        .zusatzstoffe-footer {
+            background: #f8f9fa;
+            border-top: 2px solid #3498db;
+            padding: 10px 15px;
+            flex-shrink: 0;
+        }
+        
+        .zusatzstoffe-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .zusatzstoffe-liste {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px 25px;
+            font-size: 0.8em;
+            color: #2c3e50;
+        }
+        
+        .zusatzstoffe-liste span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .zusatz-nummer {
+            font-weight: bold;
+            color: #27ae60;
+            background: #e8f5e9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        
+        .hinweis-text {
+            background: #fff3cd;
+            border-top: 1px solid #ffeeba;
+            padding: 8px 15px;
+            font-size: 0.75em;
+            color: #856404;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .hinweis-text p {
+            margin-bottom: 3px;
+        }
+        
+        .hinweis-text small {
+            color: #856404;
+            opacity: 0.9;
+        }
+        
+        .app-footer {
+            background: #34495e;
+            color: white;
+            text-align: center;
+            padding: 6px;
+            font-size: 0.75em;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header mit Logo und Zurück-Button -->
+        <div class="app-header no-print">
+            <div class="logo">
+                <div class="logo-icon">🍦</div>
+                <div>Die Primel Eiscafé</div>
+            </div>
+            <button class="back-btn" onclick="goToIndex()">← Zurück zur Übersicht</button>
+        </div>
+        
+        <!-- Seiten-Header (nicht fix) -->
+        <div class="page-header">
+            <h2>Allergene und Zusatzstoffe</h2>
+            <div class="subtitle">Stand: 11.2025 · Primelweg 2 · 53229 Bonn</div>
+        </div>
+        
+        <div class="content">
+            <div class="page">
+                <!-- Table Container mit fixiertem Kopf -->
+                <div class="table-container" id="tableContainer"></div>
+            </div>
+        </div>
+        
+        <!-- Zusatzstoffe Liste (neu) -->
+        <div class="zusatzstoffe-footer no-print">
+            <div class="zusatzstoffe-title">📋 Zusatzstoffe:</div>
+            <div class="zusatzstoffe-liste">
+                <span><span class="zusatz-nummer">(1)</span> mit Farbstoff</span>
+                <span><span class="zusatz-nummer">(2)</span> mit Konservierungsstoffen</span>
+                <span><span class="zusatz-nummer">(3)</span> Nitratpökelsalz</span>
+                <span><span class="zusatz-nummer">(4)</span> mit Antioxidationsmittel</span>
+                <span><span class="zusatz-nummer">(5)</span> mit Geschmacksverstärker</span>
+                <span><span class="zusatz-nummer">(6)</span> geschwefelt</span>
+                <span><span class="zusatz-nummer">(7)</span> geschwärzt</span>
+                <span><span class="zusatz-nummer">(8)</span> gewachst</span>
+                <span><span class="zusatz-nummer">(9)</span> mit Phosphat</span>
+                <span><span class="zusatz-nummer">(10)</span> mit Süßungsmitteln</span>
+                <span><span class="zusatz-nummer">(11)</span> mit Milcheiweiß</span>
+                <span><span class="zusatz-nummer">(12)</span> koffeinhaltig</span>
+                <span><span class="zusatz-nummer">(13)</span> alkoholhaltig</span>
+                <span><span class="zusatz-nummer">(14)</span> chininhaltig</span>
+                <span><span class="zusatz-nummer">(15)</span> enthält eine Phenylalaninquelle</span>
+            </div>
+        </div>
+        
+        <!-- Hinweis-Text -->
+        <div class="hinweis-text">
+            <p>Es kann keine Garantie für eine hundertprozentige Vollständigkeit der Angaben übernommen werden.</p>
+            <p>Kreuzkontaminationen bei den einzelnen Zutaten sowie technologisch unvermeidbare Verunreinigungen einzelner Produkte können nicht ausgeschlossen werden.</p>
+            <small>Die Vollständigkeit der Angaben übernommen werden.</small>
+        </div>
+        
+        <div class="app-footer no-print">
+            <p>Allergene und Zusatzstoffe · Stand: 11.2025</p>
+        </div>
+    </div>
+
+    <script>
+        // Nummern-System (1-15)
+        const KATEGORIEN = [
+            "Gluten", "Schalenfrüchte", "Fisch", "Eier", "Krebstiere", 
+            "Weichtiere", "Erdnüsse", "Sesam", "Soja", "Lupine", 
+            "Sellerie", "Senf", "Milch & Laktose", "Sulfite", "Zusatzstoffe"
+        ];
+        
+        // ==================== PRODUKTDATEN ====================
+        const produkte = [
+            // ===== Eissorten =====
+            { kategorie: "Eissorten", name: "Vanille", nummern: [13] },
+            { kategorie: "Eissorten", name: "Schokolade", nummern: [13] },
+            { kategorie: "Eissorten", name: "Dunkel Schokolade", nummern: [1, 2, 13] },
+            { kategorie: "Eissorten", name: "Dubai Schokolade", nummern: [1, 13] },
+            { kategorie: "Eissorten", name: "Haselnuss", nummern: [2, 13] },
+            { kategorie: "Eissorten", name: "Mokka", nummern: [13, "z12"] },
+            { kategorie: "Eissorten", name: "Stracciatella", nummern: [13] },
+            { kategorie: "Eissorten", name: "Amarena", nummern: [13] },
+            { kategorie: "Eissorten", name: "Pistazie", nummern: [2, 13] },
+            { kategorie: "Eissorten", name: "Joghurt", nummern: [13] },
+            { kategorie: "Eissorten", name: "Joghurt Mango", nummern: [13] },
+            { kategorie: "Eissorten", name: "After Eight", nummern: [13] },
+            { kategorie: "Eissorten", name: "Cookies", nummern: [1, 2, 4, 9, 13] },
+            { kategorie: "Eissorten", name: "Raffaello", nummern: [2, 13] },
+            { kategorie: "Eissorten", name: "Rocher", nummern: [2, 13] },
+            { kategorie: "Eissorten", name: "Donauwelle", nummern: [13] },
+            { kategorie: "Eissorten", name: "Karamell", nummern: [13] },
+            { kategorie: "Eissorten", name: "Snickers", nummern: [7, 13] },
+            { kategorie: "Eissorten", name: "Nuttela", nummern: [2, 13] },
+            { kategorie: "Eissorten", name: "Tiramisu", nummern: [1, 13, "z13"] },
+            { kategorie: "Eissorten", name: "Oreo", nummern: [1, 13] },
+            { kategorie: "Eissorten", name: "Malaga", nummern: [13, "z13"] },
+            { kategorie: "Eissorten", name: "Blauer Himmel", nummern: [13, "z1", "z5", "z10"] },
+            { kategorie: "Eissorten", name: "Zitrone", nummern: [0] },
+            { kategorie: "Eissorten", name: "Erdbeere", nummern: [0] },
+            { kategorie: "Eissorten", name: "Himbeere", nummern: [0] },
+            { kategorie: "Eissorten", name: "Waldbeere", nummern: [0] },
+            { kategorie: "Eissorten", name: "Mango", nummern: [0] },
+            { kategorie: "Eissorten", name: "Maracuja", nummern: [0] },
+            { kategorie: "Eissorten", name: "Wasser", nummern: [0] },
+            { kategorie: "Eissorten", name: "Melone", nummern: [0] },
+            { kategorie: "Eissorten", name: "Banane", nummern: [0] },
+            
+            // ===== Extra =====
+            { kategorie: "Extra", name: "Sahne", nummern: [13] },
+            { kategorie: "Extra", name: "Eierlikör", nummern: [4, 9, "z13"] },
+            { kategorie: "Extra", name: "Nusslikör", nummern: [2, "z13"] },
+            { kategorie: "Extra", name: "Krokant", nummern: [2] },
+            { kategorie: "Extra", name: "Amarena", nummern: [0] },
+            { kategorie: "Extra", name: "Nuss", nummern: [2] },
+            { kategorie: "Extra", name: "Walnuss", nummern: [2] },
+            { kategorie: "Extra", name: "Schokosoße", nummern: [2, 13] },
+            { kategorie: "Extra", name: "Schokoraspel", nummern: [13] },
+            { kategorie: "Extra", name: "Primelrolle", nummern: [1, 2, 13] },
+            { kategorie: "Extra", name: "Smarties", nummern: [13, "z1"] },
+            { kategorie: "Extra", name: "Streusel", nummern: ["z1"] },
+            { kategorie: "Extra", name: "Portion Obst", nummern: [0] },
+            { kategorie: "Extra", name: "Erdbeeren", nummern: [0] },
+            { kategorie: "Extra", name: "Baileys", nummern: [13, "z1", "z13"] },
+            { kategorie: "Extra", name: "Rum", nummern: ["z13"] },
+            { kategorie: "Extra", name: "Amaretto", nummern: ["z13"] },
+            
+            // ===== Eisbecher =====
+            { kategorie: "Eisbecher", name: "Spaghetti-Eis", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Sp.Pisto", nummern: [2, 13] },
+            { kategorie: "Eisbecher", name: "Sp.Nero", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Sp.Erdbeeren", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Sp.Banane", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Sp.Spezial", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Sp.Kiwi", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Biene Maja", nummern: [1, 13] },
+            { kategorie: "Eisbecher", name: "Mickey Maus", nummern: [1, 13] },
+            { kategorie: "Eisbecher", name: "Pinocchio", nummern: [1, 13] },
+            { kategorie: "Eisbecher", name: "Erdbeer Becher", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Frucht-Becher", nummern: [13] },
+            { kategorie: "Eisbecher", name: "After Eight Becher", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Italia-Becher", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Haselnuss Becher", nummern: [2, 13] },
+            { kategorie: "Eisbecher", name: "Cookies Becher", nummern: [1, 2, 4, 9, 13] },
+            { kategorie: "Eisbecher", name: "Bananensplit", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Amarena Becher", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Yogurette Becher", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Schoko Becher", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Raffaello Becher", nummern: [1, 2, 13] },
+            { kategorie: "Eisbecher", name: "Giotto Becher", nummern: [1, 2, 13] },
+            { kategorie: "Eisbecher", name: "Toffifee Becher", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Karamell Becher", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Dubai-Becher", nummern: [1, 2, 13] },
+            { kategorie: "Eisbecher", name: "Die Primelrolle", nummern: [1, 2, 13] },
+            { kategorie: "Eisbecher", name: "Joghurt Erdbeer", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Joghurt-Banane", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Joghurt Amarena", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Joghurt-Spezial", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Joghurt-Nuss", nummern: [2, 13] },
+            { kategorie: "Eisbecher", name: "Joghurt-Müsli", nummern: [2, 13] },
+            { kategorie: "Eisbecher", name: "Joghurt-Kiwi", nummern: [13] },
+            { kategorie: "Eisbecher", name: "Amaretto Becher", nummern: [1, 13, "z13"] },
+            { kategorie: "Eisbecher", name: "Malaga-Becher", nummern: [13, "z13"] },
+            { kategorie: "Eisbecher", name: "Eierlikör Becher", nummern: [4, 9, 13, "z13"] },
+            { kategorie: "Eisbecher", name: "Krokant-Becher", nummern: [2, 13, "z13"] },
+            { kategorie: "Eisbecher", name: "Tiramisu Becher", nummern: [1, 2, 13, "z13"] },
+            { kategorie: "Eisbecher", name: "Mokka-Becher", nummern: [13, "z12", "z13"] },
+            
+            // ===== Getränke / Shakes =====
+            { kategorie: "Getränke / Shakes", name: "Kaffee", nummern: ["z12"] },
+            { kategorie: "Getränke / Shakes", name: "Cappuccino", nummern: [13, "z12"] },
+            { kategorie: "Getränke / Shakes", name: "Espresso", nummern: ["z12"] },
+            { kategorie: "Getränke / Shakes", name: "Milchkaffee", nummern: [13, "z12"] },
+            { kategorie: "Getränke / Shakes", name: "Latte Macchiato", nummern: [13, "z12"] },
+            { kategorie: "Getränke / Shakes", name: "Affogato", nummern: [13, "z12"] },
+            { kategorie: "Getränke / Shakes", name: "Americano", nummern: ["z12"] },
+            { kategorie: "Getränke / Shakes", name: "Kakao", nummern: [2, 13] },
+            { kategorie: "Getränke / Shakes", name: "Kakao mit Sahne", nummern: [2, 13] },
+            { kategorie: "Getränke / Shakes", name: "TEE", nummern: [0] },
+            { kategorie: "Getränke / Shakes", name: "Frischer Orangensaft", nummern: [0] },
+            { kategorie: "Getränke / Shakes", name: "Cola", nummern: ["z1", "z12"] },
+            { kategorie: "Getränke / Shakes", name: "Cola light", nummern: ["z1", "z2", "z10", "z12", "z15"] },
+            { kategorie: "Getränke / Shakes", name: "Cola Zeero", nummern: ["z1", "z2", "z10", "z12", "z15"] },
+            { kategorie: "Getränke / Shakes", name: "Lemo, Orange", nummern: ["z1", "z4", "z12"] },
+            { kategorie: "Getränke / Shakes", name: "Apfelschorle", nummern: ["z2"] },
+            { kategorie: "Getränke / Shakes", name: "Milchshake", nummern: [13] },
+            { kategorie: "Getränke / Shakes", name: "Milchshake mit Sahne", nummern: [13] },
+            { kategorie: "Getränke / Shakes", name: "Wasser", nummern: [0] },
+            { kategorie: "Getränke / Shakes", name: "Tonic Water", nummern: ["z2", "z4"] },
+            { kategorie: "Getränke / Shakes", name: "Eiskakao", nummern: [2, 13] },
+            { kategorie: "Getränke / Shakes", name: "Eiskaffee", nummern: [13, "z12"] },
+            { kategorie: "Getränke / Shakes", name: "Eislatte", nummern: ["z12"] },
+            { kategorie: "Getränke / Shakes", name: "Bier alkoholfrei", nummern: [0] },
+            
+            // ===== Waffel =====
+            { kategorie: "Waffel", name: "Waffel-Puderzucker", nummern: [1, 4, 13] },
+            { kategorie: "Waffel", name: "Waffel-Klassik", nummern: [1, 4, 13] },
+            { kategorie: "Waffel", name: "Banane, Zimt", nummern: [1, 4, 13] },
+            { kategorie: "Waffel", name: "Tutti Frutti", nummern: [1, 4, 13] },
+            { kategorie: "Waffel", name: "Waffel-Amarena", nummern: [1, 4, 13] },
+            { kategorie: "Waffel", name: "Waffel Heiße Kirsche", nummern: [1, 4, 13] },
+            { kategorie: "Waffel", name: "Waffel-Erdbeer", nummern: [1, 4, 13] }
+        ];
+        
+        // ==================== TABELLE BAUEN ====================
+        function buildTable() {
+            let html = `<table>
+                <thead>
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Gluten</th>
+                        <th>Schalen-<br>früchte</th>
+                        <th>Fisch</th>
+                        <th>Eier</th>
+                        <th>Krebs-<br>tiere</th>
+                        <th>Weich-<br>tiere</th>
+                        <th>Erd-<br>nüsse</th>
+                        <th>Sesam</th>
+                        <th>Soja</th>
+                        <th>Lupine</th>
+                        <th>Sellerie</th>
+                        <th>Senf</th>
+                        <th>Milch &<br>Laktose</th>
+                        <th>Sulfite</th>
+                        <th>Zusatz-<br>stoffe</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            let currentCategory = "";
+            
+            produkte.forEach(produkt => {
+                // Kategorieüberschrift
+                if (produkt.kategorie !== currentCategory) {
+                    currentCategory = produkt.kategorie;
+                    html += `<tr class="category-row"><td colspan="16">🍦 ${currentCategory}</td></tr>`;
+                }
+                
+                html += `<tr>`;
+                html += `<td>${produkt.name}</td>`;
+                
+                // Sammle alle z-Nummern für Zusatzstoffe (Spalte 15)
+                const zNummern = produkt.nummern
+                    .filter(n => typeof n === 'string' && n.startsWith('z'))
+                    .map(n => parseInt(n.substring(1)))
+                    .sort((a, b) => a - b);
+                
+                // 15 Spalten (1-15)
+                for (let i = 1; i <= 15; i++) {
+                    const nummern = produkt.nummern;
+                    
+                    // Prüfen ob normale Nummer (i) vorhanden ist
+                    if (nummern.includes(i)) {
+                        html += `<td class="x-mark">X</td>`;
+                    }
+                    // Für Spalte 15: z-Nummern als Text
+                    else if (i === 15 && zNummern.length > 0) {
+                        html += `<td class="zusatz-nr">${zNummern.join(',')}</td>`;
+                    }
+                    else {
+                        html += `<td></td>`;
+                    }
+                }
+                
+                html += `</tr>`;
+            });
+            
+            html += `</tbody></table>`;
+            document.getElementById('tableContainer').innerHTML = html;
+        }
+        
+        // ==================== NAVIGATION ====================
+        function goToIndex() {
+            window.location.href = 'index.html';
+        }
+        
+        // Tabelle beim Laden bauen
+        document.addEventListener('DOMContentLoaded', buildTable);
+    </script>
+</body>
+</html>

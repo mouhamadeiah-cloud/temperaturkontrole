@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primel Eiscafé</title>
+    <style>
+        /* نفس التنسيقات السابقة */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: #f0f2f5;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
+        }
+        
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0.8cm;
+            }
+            
+            body {
+                padding: 0;
+                background: white;
+                overflow: visible;
+                height: auto;
+            }
+            
+            .container {
+                max-width: 100%;
+                height: auto;
+                box-shadow: none;
+                border-radius: 0;
+                overflow: visible;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .content {
+                overflow: visible;
+                height: auto;
+            }
+            
+            .page {
+                overflow: visible;
+                height: auto;
+            }
+            
+            body.printing-temp #cleanPage,
+            body.printing-clean #tempPage,
+            body.printing-temp .abbreviations-line.clean-only,
+            body.printing-clean .abbreviations-line.temp-only {
+                display: none !important;
+            }
+            
+            body.printing-temp #tempPage,
+            body.printing-clean #cleanPage {
+                display: block !important;
+            }
+            
+            .table-container {
+                overflow: visible;
+                height: auto;
+            }
+            
+            table {
+                page-break-after: auto;
+                border: 1px solid #000;
+                font-size: 8pt;
+                table-layout: fixed;
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+                height: 0.6cm;
+            }
+            
+            thead {
+                display: table-header-group;
+            }
+            
+            tbody {
+                display: table-row-group;
+            }
+            
+            th {
+                background: #34495e !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 4px 2px;
+                font-size: 8pt;
+                height: 0.8cm;
+            }
+            
+            td {
+                border: 1px solid #000 !important;
+                padding: 3px 2px;
+                font-size: 8pt;
+                height: 0.6cm;
+                color: black !important;
+            }
+            
+            select {
+                border: none;
+                background: transparent;
+                -webkit-appearance: none;
+                appearance: none;
+                font-weight: normal;
+                font-size: 8pt;
+                padding: 0;
+                color: black !important;
+            }
+            
+            .abbreviations-line {
+                display: block !important;
+                margin-top: 10px;
+                page-break-before: avoid;
+                font-size: 8pt;
+                padding: 4px;
+                color: black;
+            }
+            
+            .page-header {
+                padding: 4px 8px;
+                margin-bottom: 5px;
+            }
+            
+            .page-header h2 {
+                font-size: 12pt;
+                color: black;
+            }
+        }
+        
+        .container {
+            max-width: 1400px;
+            height: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .app-header h1 {
+            font-size: 1.6em;
+        }
+        
+        .nav-bar {
+            display: flex;
+            background: #34495e;
+            padding: 8px;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            background: #2c3e50;
+            color: white;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .nav-btn.active {
+            background: #3498db;
+        }
+        
+        .toolbar {
+            padding: 10px 15px;
+            background: #ecf0f1;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-bottom: 1px solid #bdc3c7;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .month-selector input {
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-print { background: #95a5a6; color: white; }
+        
+        .page-header {
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #3498db;
+            flex-shrink: 0;
+        }
+        
+        .page-header h2 {
+            font-size: 1.3em;
+            color: #2c3e50;
+        }
+        
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        .page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            background: white;
+            min-height: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #34495e;
+            font-size: 0.85em;
+            table-layout: fixed;
+        }
+        
+        th, td {
+            width: 9.09%;
+            padding: 6px 3px;
+            border: 1px solid #bdc3c7;
+            text-align: center;
+            vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: black;
+        }
+        
+        th:first-child, td:first-child {
+            width: 12%;
+        }
+        
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 8px 3px;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        select {
+            width: 100%;
+            padding: 3px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            font-size: 0.8em;
+            background: white;
+            color: black;
+        }
+        
+        .x-field {
+            font-weight: bold;
+        }
+        
+        .future-row {
+            background: #f5f5f5;
+            color: #999;
+        }
+        
+        .today-row {
+            background: #fff3cd;
+        }
+        
+        .next-day-row {
+            background: #e3f2fd;
+        }
+        
+        .abbreviations-line {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            flex-shrink: 0;
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .abbreviations-line.temp-only {
+            display: block;
+        }
+        
+        .abbreviations-line.clean-only {
+            display: none;
+        }
+        
+        .abbreviations-line span {
+            display: inline-block;
+            margin: 0 8px;
+        }
+        
+        .abbr {
+            font-weight: bold;
+        }
+        
+        .app-footer {
+            background: #34495e;
+            color: white;
+            text-align: center;
+            padding: 4px;
+            font-size: 0.75em;
+            flex-shrink: 0;
+        }
+        
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #27ae60;
+            color: white;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            font-weight: 600;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="alert" id="alert"></div>
+    
+    <div class="container">
+        <div class="app-header no-print">
+            <h1>🍦 Primel Eiscafé</h1>
+        </div>
+        
+        <div class="nav-bar no-print">
+            <button class="nav-btn active" onclick="showPage('temp')">🌡️ Temperaturkontrolle</button>
+            <button class="nav-btn" onclick="showPage('clean')">🧹 Reinigungsplan</button>
+        </div>
+        
+        <div class="toolbar no-print">
+            <div class="month-selector">
+                <label>Monat / Jahr:</label>
+                <input type="month" id="monthSelector" min="2026-02" value="2026-02" onchange="changeMonth()">
+            </div>
+            <button class="btn btn-primary" onclick="currentMonth()">Aktuell</button>
+            <button class="btn btn-success" onclick="saveData()">Speichern</button>
+            <button class="btn btn-print" onclick="printCurrentPage()">🖨️ Diese Seite drucken</button>
+       <button class="btn btn-primary" onclick="window.location.href='allergene.html'">
+    📋 Allergene & Zusatzstoffe
+</button>
+ </div>
+        
+        <div class="content">
+            <!-- Temperaturseite -->
+            <div id="tempPage" class="page">
+                <div class="page-header">
+                    <h2 id="tempHeader">Die Primel Eiscafé Temperaturkontrolle für 03.2026</h2>
+                </div>
+                <div class="table-container" id="tempContainer"></div>
+            </div>
+            
+            <!-- Reinigungsseite -->
+            <div id="cleanPage" class="page" style="display: none;">
+                <div class="page-header">
+                    <h2 id="cleanHeader">Die Primel Eiscafé Reinigungsplan für 03.2026</h2>
+                </div>
+                <div class="table-container" id="cleanContainer"></div>
+            </div>
+        </div>
+        
+        <!-- الاختصارات - للحرارة فقط -->
+        <div class="abbreviations-line temp-only">
+            <span><span class="abbr">T.K 1</span> = Tiefkühlschrank 1</span>
+            <span><span class="abbr">T.K 2</span> = Tiefkühlschrank 2</span>
+            <span><span class="abbr">G.K</span> = Getränke Kühlschrank</span>
+            <span><span class="abbr">U.K</span> = Unter Kühlschrank</span>
+            <span><span class="abbr">L.K</span> = Lager Kühlschrank</span>
+        </div>
+        
+        <div class="abbreviations-line clean-only">
+            <!-- فارغة -->
+        </div>
+        
+        <div class="app-footer no-print">
+            <p>© 2026 Primel Eiscafé</p>
+        </div>
+    </div>
+
+    <script>
+        const MINUS = ['-16', '-17', '-18', '-19'];
+        const PLUS = ['2', '3', '4', '5'];
+        const NAMES = ['Mouhamadeiah', 'nejmeh', 'Alo'];
+        const WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+        
+        let currentPage = 'temp';
+        let updateInterval;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            startDailyUpdateCheck();
+        });
+        
+        function initializeApp() {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            
+            if (y < 2026 || (y === 2026 && m < '02')) {
+                document.getElementById('monthSelector').value = '2026-02';
+                loadMonth('2026', '02');
+            } else {
+                document.getElementById('monthSelector').value = `${y}-${m}`;
+                loadMonth(y.toString(), m);
+            }
+        }
+        
+        function startDailyUpdateCheck() {
+            // التحقق كل دقيقة
+            updateInterval = setInterval(checkForDailyUpdate, 60000);
+            // التحقق فوراً
+            checkForDailyUpdate();
+        }
+        
+        function checkForDailyUpdate() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+            const currentDay = now.getDate();
+            
+            // مفتاح آخر تحديث
+            const lastUpdateKey = 'lastDailyUpdate';
+            const lastUpdate = localStorage.getItem(lastUpdateKey);
+            
+            // التاريخ الحالي
+            const todayStr = `${currentYear}-${currentMonth}-${currentDay}`;
+            
+            // إذا كان آخر تحديث مختلف عن اليوم، نقوم بالتحديث
+            if (lastUpdate !== todayStr) {
+                console.log(`🕐 تحديث: اليوم ${currentDay}.${currentMonth}.${currentYear} أصبح ثابتاً`);
+                
+                // جعل اليوم الحالي ثابتاً
+                finalizeCurrentDay(currentYear, currentMonth, currentDay);
+                
+                // تجهيز اليوم التالي ليكون قابلاً للتعديل
+                prepareNextDay(currentYear, currentMonth, currentDay);
+                
+                // حفظ آخر تحديث
+                localStorage.setItem(lastUpdateKey, todayStr);
+                
+                // حفظ البيانات
+                saveData();
+                
+                showAlert(`✅ ${currentDay}.${currentMonth}.${currentYear} wurde abgeschlossen`, 'success');
+            }
+        }
+        
+        function finalizeCurrentDay(year, month, day) {
+            // تحويل اليوم الحالي من selects إلى نصوص ثابتة
+            
+            // جدول الحرارة
+            const tempRows = document.querySelectorAll('#tempContainer tbody tr');
+            for (let row of tempRows) {
+                const dayCell = row.cells[0].textContent;
+                if (dayCell.includes(`${day}.${month}`)) {
+                    
+                    // تحويل جميع ال selects إلى نصوص
+                    for (let i = 1; i <= 9; i++) {
+                        const cell = row.cells[i];
+                        const select = cell.querySelector('select');
+                        if (select) {
+                            const value = select.value;
+                            if (value) {
+                                cell.innerHTML = value + (i <= 5 ? '°C' : '°C');
+                            } else {
+                                // إذا كان فارغاً، نعطي قيمة عشوائية
+                                if (i <= 5) {
+                                    const randomVal = MINUS[Math.floor(Math.random() * MINUS.length)];
+                                    cell.innerHTML = randomVal + '°C';
+                                } else {
+                                    const randomVal = PLUS[Math.floor(Math.random() * PLUS.length)];
+                                    cell.innerHTML = randomVal + '°C';
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Kontroler: إضافة اسم عشوائي إذا كان فارغاً
+                    const kontrolerCell = row.cells[10];
+                    if (!kontrolerCell.textContent) {
+                        const randomName = NAMES[Math.floor(Math.random() * NAMES.length)];
+                        kontrolerCell.innerHTML = randomName;
+                    }
+                    
+                    // إزالة كلاس today-row
+                    row.classList.remove('today-row');
+                    
+                    break;
+                }
+            }
+            
+            // جدول التنظيف
+            const cleanRows = document.querySelectorAll('#cleanContainer tbody tr');
+            for (let row of cleanRows) {
+                const dayCell = row.cells[0].textContent;
+                if (dayCell.includes(`${day}.${month}`)) {
+                    
+                    // تحويل الحقول الفارغة إلى x
+                    for (let i = 1; i <= 4; i++) {
+                        const cell = row.cells[i];
+                        if (!cell.textContent) {
+                            cell.innerHTML = 'x';
+                        }
+                    }
+                    
+                    // Kontroler: إضافة اسم عشوائي إذا كان فارغاً
+                    const kontrolerCell = row.cells[5];
+                    if (!kontrolerCell.textContent) {
+                        const randomName = NAMES[Math.floor(Math.random() * NAMES.length)];
+                        kontrolerCell.innerHTML = randomName;
+                    }
+                    
+                    // إزالة كلاس today-row
+                    row.classList.remove('today-row');
+                    
+                    break;
+                }
+            }
+        }
+        
+        function prepareNextDay(year, month, day) {
+            // تجهيز اليوم التالي (day+1) ليكون قابلاً للتعديل
+            
+            // التحقق من وجود يوم تالي في نفس الشهر
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const nextDay = day + 1;
+            
+            if (nextDay <= daysInMonth) {
+                // جدول الحرارة
+                const tempRows = document.querySelectorAll('#tempContainer tbody tr');
+                for (let row of tempRows) {
+                    const dayCell = row.cells[0].textContent;
+                    if (dayCell.includes(`${nextDay}.${month}`)) {
+                        
+                        // تحويل الخلايا إلى selects فارغة
+                        for (let i = 1; i <= 5; i++) {
+                            const cell = row.cells[i];
+                            const select = document.createElement('select');
+                            select.innerHTML = '<option value="">—</option>' + 
+                                MINUS.map(t => `<option value="${t}">${t}°C</option>`).join('');
+                            cell.innerHTML = '';
+                            cell.appendChild(select);
+                        }
+                        
+                        for (let i = 6; i <= 9; i++) {
+                            const cell = row.cells[i];
+                            const select = document.createElement('select');
+                            select.innerHTML = '<option value="">—</option>' + 
+                                PLUS.map(t => `<option value="${t}">${t}°C</option>`).join('');
+                            cell.innerHTML = '';
+                            cell.appendChild(select);
+                        }
+                        
+                        // تفريغ Kontroler
+                        row.cells[10].innerHTML = '';
+                        
+                        // إضافة كلاس مميز لليوم القابل للتعديل
+                        row.classList.add('next-day-row');
+                        
+                        break;
+                    }
+                }
+                
+                // جدول التنظيف
+                const cleanRows = document.querySelectorAll('#cleanContainer tbody tr');
+                for (let row of cleanRows) {
+                    const dayCell = row.cells[0].textContent;
+                    if (dayCell.includes(`${nextDay}.${month}`)) {
+                        
+                        // تفريغ الحقول
+                        for (let i = 1; i <= 4; i++) {
+                            row.cells[i].innerHTML = '';
+                        }
+                        
+                        // تفريغ Kontroler
+                        row.cells[5].innerHTML = '';
+                        
+                        // إضافة كلاس مميز
+                        row.classList.add('next-day-row');
+                        
+                        break;
+                    }
+                }
+            }
+        }
+        
+        function loadMonth(year, month) {
+            const savedTempData = loadSavedData('temp', year, month);
+            const savedCleanData = loadSavedData('clean', year, month);
+            
+            buildTempTable(year, month, savedTempData);
+            buildCleanTable(year, month, savedCleanData);
+        }
+        
+        function loadSavedData(type, year, month) {
+            const saved = localStorage.getItem(`${type}_${year}_${month}`);
+            return saved ? JSON.parse(saved) : null;
+        }
+        
+        function buildTempTable(year, month, savedData) {
+            const days = new Date(year, month, 0).getDate();
+            const today = new Date();
+            const cy = today.getFullYear();
+            const cm = String(today.getMonth() + 1).padStart(2, '0');
+            const cd = today.getDate();
+            
+            // التحقق مما إذا كنا بعد 00:01
+            const lastUpdate = localStorage.getItem('lastDailyUpdate');
+            const todayStr = `${cy}-${cm}-${cd}`;
+            const isAfterUpdate = (lastUpdate === todayStr);
+            
+            let html = `<table><thead><tr>
+                <th>Tag</th>
+                <th>Theke1</th><th>Theke2</th><th>T.K1</th><th>T.K2</th><th>Lieferung</th>
+                <th>G.K</th><th>U.K</th><th>Saladette</th><th>L.K</th><th>Kontroler</th>
+            </tr></thead><tbody>`;
+            
+            for (let d = 1; d <= days; d++) {
+                const wd = WEEKDAYS[new Date(year, month-1, d).getDay()];
+                
+                // تحديد حالة اليوم
+                const isPast = (year < cy) || (year == cy && month < cm) || (year == cy && month == cm && d < cd);
+                const isToday = (year == cy && month == cm && d == cd);
+                const isTomorrow = (year == cy && month == cm && d == cd + 1);
+                const isFuture = (year > cy) || (year == cy && month > cm) || (year == cy && month == cm && d > cd + 1);
+                
+                let rowClass = '';
+                if (isFuture) rowClass = 'future-row';
+                if (isToday && !isAfterUpdate) rowClass = 'today-row';
+                if (isTomorrow && isAfterUpdate) rowClass = 'next-day-row';
+                if (isToday && isAfterUpdate) rowClass = ''; // اليوم أصبح ثابتاً
+                
+                html += `<tr class="${rowClass}">`;
+                html += `<td>${wd} ${d}.${month}</td>`;
+                
+                const dayData = savedData && savedData[d] ? savedData[d] : null;
+                
+                // -16°C Geräte (5)
+                for (let i = 0; i < 5; i++) {
+                    if (isPast || (isToday && isAfterUpdate)) {
+                        // أيام ماضية أو اليوم بعد التحديث: نصوص ثابتة
+                        const savedVal = dayData ? dayData.minus[i] : null;
+                        const val = savedVal || MINUS[Math.floor(Math.random() * MINUS.length)];
+                        html += `<td>${val}°C</td>`;
+                    } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
+                        // اليوم قبل التحديث أو الغد بعد التحديث: selects فارغة
+                        const savedVal = dayData ? dayData.minus[i] : '';
+                        html += `<td><select>`;
+                        html += `<option value="">—</option>`;
+                        MINUS.forEach(t => html += `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}°C</option>`);
+                        html += `</select></td>`;
+                    } else {
+                        // المستقبل: فارغ
+                        html += `<td></td>`;
+                    }
+                }
+                
+                // 5°C Geräte (4)
+                for (let i = 0; i < 4; i++) {
+                    if (isPast || (isToday && isAfterUpdate)) {
+                        const savedVal = dayData ? dayData.plus[i] : null;
+                        const val = savedVal || PLUS[Math.floor(Math.random() * PLUS.length)];
+                        html += `<td>${val}°C</td>`;
+                    } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
+                        const savedVal = dayData ? dayData.plus[i] : '';
+                        html += `<td><select>`;
+                        html += `<option value="">—</option>`;
+                        PLUS.forEach(t => html += `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}°C</option>`);
+                        html += `</select></td>`;
+                    } else {
+                        html += `<td></td>`;
+                    }
+                }
+                
+                // Kontroler
+                if (isPast || (isToday && isAfterUpdate)) {
+                    const savedName = dayData ? dayData.kontroler : null;
+                    const name = savedName || NAMES[Math.floor(Math.random() * NAMES.length)];
+                    html += `<td>${name}</td>`;
+                } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
+                    html += `<td></td>`;
+                } else {
+                    html += `<td></td>`;
+                }
+                
+                html += `</tr>`;
+            }
+            
+            html += `</tbody></table>`;
+            document.getElementById('tempContainer').innerHTML = html;
+            document.getElementById('tempHeader').innerHTML = `Die Primel Eiscafé Temperaturkontrolle für ${month}.${year}`;
+        }
+        
+        function buildCleanTable(year, month, savedData) {
+            const days = new Date(year, month, 0).getDate();
+            const today = new Date();
+            const cy = today.getFullYear();
+            const cm = String(today.getMonth() + 1).padStart(2, '0');
+            const cd = today.getDate();
+            
+            const lastUpdate = localStorage.getItem('lastDailyUpdate');
+            const todayStr = `${cy}-${cm}-${cd}`;
+            const isAfterUpdate = (lastUpdate === todayStr);
+            
+            let html = `<table><thead><tr>
+                <th>Tag</th><th>Eisdiele</th><th>Lager</th><th>Toilette</th><th>Geräte</th><th>Kontroler</th>
+            </tr></thead><tbody>`;
+            
+            for (let d = 1; d <= days; d++) {
+                const wd = WEEKDAYS[new Date(year, month-1, d).getDay()];
+                
+                const isPast = (year < cy) || (year == cy && month < cm) || (year == cy && month == cm && d < cd);
+                const isToday = (year == cy && month == cm && d == cd);
+                const isTomorrow = (year == cy && month == cm && d == cd + 1);
+                const isFuture = (year > cy) || (year == cy && month > cm) || (year == cy && month == cm && d > cd + 1);
+                
+                let rowClass = '';
+                if (isFuture) rowClass = 'future-row';
+                if (isToday && !isAfterUpdate) rowClass = 'today-row';
+                if (isTomorrow && isAfterUpdate) rowClass = 'next-day-row';
+                
+                html += `<tr class="${rowClass}">`;
+                html += `<td>${wd} ${d}.${month}</td>`;
+                
+                const dayData = savedData && savedData[d] ? savedData[d] : null;
+                
+                for (let i = 0; i < 4; i++) {
+                    if (isPast || (isToday && isAfterUpdate)) {
+                        const savedVal = dayData ? dayData.fields[i] : null;
+                        html += `<td>${savedVal || 'x'}</td>`;
+                    } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
+                        html += `<td></td>`;
+                    } else {
+                        html += `<td></td>`;
+                    }
+                }
+                
+                // Kontroler
+                if (isPast || (isToday && isAfterUpdate)) {
+                    const savedName = dayData ? dayData.kontroler : null;
+                    const name = savedName || NAMES[Math.floor(Math.random() * NAMES.length)];
+                    html += `<td>${name}</td>`;
+                } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
+                    html += `<td></td>`;
+                } else {
+                    html += `<td></td>`;
+                }
+                
+                html += `</tr>`;
+            }
+            
+            html += `</tbody></table>`;
+            document.getElementById('cleanContainer').innerHTML = html;
+            document.getElementById('cleanHeader').innerHTML = `Die Primel Eiscafé Reinigungsplan für ${month}.${year}`;
+        }
+        
+        function showPage(page) {
+            currentPage = page;
+            document.getElementById('tempPage').style.display = page === 'temp' ? 'flex' : 'none';
+            document.getElementById('cleanPage').style.display = page === 'clean' ? 'flex' : 'none';
+            
+            if (page === 'temp') {
+                document.querySelector('.abbreviations-line.temp-only').style.display = 'block';
+                document.querySelector('.abbreviations-line.clean-only').style.display = 'none';
+            } else {
+                document.querySelector('.abbreviations-line.temp-only').style.display = 'none';
+                document.querySelector('.abbreviations-line.clean-only').style.display = 'block';
+            }
+            
+            document.querySelectorAll('.nav-btn').forEach((b, i) => {
+                b.classList.toggle('active', (i === 0 && page === 'temp') || (i === 1 && page === 'clean'));
+            });
+        }
+        
+        function printCurrentPage() {
+            if (currentPage === 'temp') {
+                document.body.classList.add('printing-temp');
+                document.body.classList.remove('printing-clean');
+            } else {
+                document.body.classList.add('printing-clean');
+                document.body.classList.remove('printing-temp');
+            }
+            
+            window.print();
+            
+            setTimeout(() => {
+                document.body.classList.remove('printing-temp', 'printing-clean');
+            }, 100);
+        }
+        
+        function changeMonth() {
+            const [y, m] = document.getElementById('monthSelector').value.split('-');
+            loadMonth(y, m);
+        }
+        
+        function currentMonth() {
+            const t = new Date();
+            const y = t.getFullYear();
+            const m = String(t.getMonth() + 1).padStart(2, '0');
+            
+            if (y < 2026 || (y === 2026 && m < '02')) {
+                showAlert('Keine Daten vor 01.02.2026', 'error');
+                return;
+            }
+            
+            document.getElementById('monthSelector').value = `${y}-${m}`;
+            loadMonth(y.toString(), m);
+        }
+        
+        function saveData() {
+            // حفظ بيانات الحرارة
+            const tempData = {};
+            const tempRows = document.querySelectorAll('#tempContainer tbody tr');
+            
+            tempRows.forEach(row => {
+                const dayCell = row.cells[0].textContent;
+                const day = dayCell.split(' ')[1].split('.')[0];
+                
+                tempData[day] = {
+                    minus: [],
+                    plus: [],
+                    kontroler: ''
+                };
+                
+                for (let i = 1; i <= 5; i++) {
+                    const cell = row.cells[i];
+                    const select = cell.querySelector('select');
+                    if (select) {
+                        tempData[day].minus.push(select.value || '');
+                    } else {
+                        const val = cell.textContent.replace('°C', '');
+                        tempData[day].minus.push(val);
+                    }
+                }
+                
+                for (let i = 6; i <= 9; i++) {
+                    const cell = row.cells[i];
+                    const select = cell.querySelector('select');
+                    if (select) {
+                        tempData[day].plus.push(select.value || '');
+                    } else {
+                        const val = cell.textContent.replace('°C', '');
+                        tempData[day].plus.push(val);
+                    }
+                }
+                
+                tempData[day].kontroler = row.cells[10].textContent;
+            });
+            
+            // حفظ بيانات التنظيف
+            const cleanData = {};
+            const cleanRows = document.querySelectorAll('#cleanContainer tbody tr');
+            
+            cleanRows.forEach(row => {
+                const dayCell = row.cells[0].textContent;
+                const day = dayCell.split(' ')[1].split('.')[0];
+                
+                cleanData[day] = {
+                    fields: [],
+                    kontroler: ''
+                };
+                
+                for (let i = 1; i <= 4; i++) {
+                    cleanData[day].fields.push(row.cells[i].textContent);
+                }
+                
+                cleanData[day].kontroler = row.cells[5].textContent;
+            });
+            
+            const [y, m] = document.getElementById('monthSelector').value.split('-');
+            localStorage.setItem(`temp_${y}_${m}`, JSON.stringify(tempData));
+            localStorage.setItem(`clean_${y}_${m}`, JSON.stringify(cleanData));
+            
+            showAlert('✅ Daten gespeichert', 'success');
+        }
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.style.backgroundColor = type === 'success' ? '#27ae60' : '#e74c3c';
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+
+    </script>
+<!-- Im head Bereich -->
+<link rel="manifest" href="manifest.json">
+<script src="app.js"></script>
+
+<!-- Für Service Worker Registrierung (optional) -->
+<script>
+if ('serviceWorker' in naviger) {
+    navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>
