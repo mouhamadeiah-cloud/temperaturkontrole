@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Primel Eiscafé - Allergene</title>
+    <title>Primel Eiscafé - Temperaturkontrolle</title>
     <style>
         * {
             margin: 0;
@@ -22,108 +22,6 @@
             padding: 10px;
         }
         
-        /* ===== DRUCKEN ===== */
-        @media print {
-            @page {
-                size: A4 landscape;
-                margin: 0.8cm;
-            }
-            
-            body {
-                padding: 0;
-                background: white;
-                overflow: visible;
-                height: auto;
-            }
-            
-            .container {
-                max-width: 100%;
-                height: auto;
-                box-shadow: none;
-                border-radius: 0;
-                overflow: visible;
-            }
-            
-            .no-print {
-                display: none !important;
-            }
-            
-            .content {
-                overflow: visible;
-                height: auto;
-            }
-            
-            .page {
-                overflow: visible;
-                height: auto;
-            }
-            
-            .table-container {
-                overflow: visible;
-                height: auto;
-            }
-            
-            table {
-                page-break-after: auto;
-                border: 1px solid #000;
-                font-size: 7pt;
-                table-layout: fixed;
-                width: 100%;
-                border-collapse: collapse;
-            }
-            
-            tr {
-                page-break-inside: avoid;
-                page-break-after: auto;
-                height: 0.5cm;
-            }
-            
-            thead {
-                display: table-header-group;
-            }
-            
-            tbody {
-                display: table-row-group;
-            }
-            
-            th {
-                background: #34495e !important;
-                color: white !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                padding: 3px 1px;
-                font-size: 7pt;
-                height: 0.7cm;
-            }
-            
-            td {
-                border: 1px solid #000 !important;
-                padding: 2px 1px;
-                font-size: 7pt;
-                height: 0.5cm;
-                color: black !important;
-            }
-            
-            .page-header {
-                padding: 4px 8px;
-                margin-bottom: 5px;
-            }
-            
-            .page-header h2 {
-                font-size: 10pt;
-                color: black;
-            }
-            
-            .logo {
-                font-size: 12pt;
-            }
-            
-            .zusatzstoffe-liste {
-                font-size: 7pt;
-            }
-        }
-        
-        /* ===== BILDSCHIRM ===== */
         .container {
             max-width: 1400px;
             height: 100%;
@@ -136,11 +34,11 @@
             overflow: hidden;
         }
         
-        /* Header mit Logo */
+        /* Header */
         .app-header {
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -168,7 +66,7 @@
             font-size: 1.4em;
         }
         
-        .back-btn {
+        .edit-btn {
             background: rgba(255,255,255,0.2);
             color: white;
             border: none;
@@ -180,30 +78,168 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
         }
         
-        .back-btn:hover {
+        .edit-btn:hover {
             background: rgba(255,255,255,0.3);
         }
         
-        /* Seiten-Header (nicht fix) */
-        .page-header {
+        .edit-btn.active {
+            background: #27ae60;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        /* PIN Modal */
+        .pin-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+        }
+        
+        .pin-modal.show {
+            display: flex;
+        }
+        
+        .pin-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+        }
+        
+        .pin-box h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .pin-box input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2em;
+            text-align: center;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            letter-spacing: 8px;
+            font-weight: bold;
+        }
+        
+        .pin-box input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .pin-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .pin-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .pin-btn.primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .pin-btn.primary:hover {
+            background: #2980b9;
+        }
+        
+        .pin-btn.secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .pin-btn.secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .pin-error {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 0.9em;
+            display: none;
+        }
+        
+        /* Toolbar */
+        .toolbar {
             padding: 10px 15px;
+            background: #ecf0f1;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-bottom: 1px solid #bdc3c7;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .month-selector input {
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-print { background: #95a5a6; color: white; }
+        
+        /* Page Header */
+        .page-header {
+            padding: 8px 15px;
             background: #f8f9fa;
             border-bottom: 2px solid #3498db;
             flex-shrink: 0;
         }
         
         .page-header h2 {
-            font-size: 1.2em;
+            font-size: 1.1em;
             color: #2c3e50;
-            margin-bottom: 5px;
-        }
-        
-        .page-header .subtitle {
-            font-size: 0.9em;
-            color: #7f8c8d;
         }
         
         .content {
@@ -222,78 +258,60 @@
             min-height: 0;
         }
         
-        /* Table Container - scrollbar */
+        /* Table Container */
         .table-container {
             flex: 1;
             overflow: auto;
             background: white;
             min-height: 0;
-            position: relative;
         }
         
-        /* Tabelle mit fixiertem Kopf */
         table {
             width: 100%;
             border-collapse: collapse;
             border: 1px solid #34495e;
-            font-size: 0.75em;
+            font-size: 0.8em;
             table-layout: fixed;
+            min-width: 1200px;
         }
         
-        /* Fixierter Tabellenkopf */
         th {
             background: #34495e;
             color: white;
             font-weight: 600;
             text-align: center;
             border: 1px solid #2c3e50;
-            padding: 8px 2px;
+            padding: 6px 2px;
             position: sticky;
             top: 0;
             z-index: 10;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 0.75em;
         }
         
-        /* Spaltenbreiten */
-        th:nth-child(1) { width: 100px; } /* Produkt */
-        th:nth-child(2) { width: 45px; }  /* Gluten */
-        th:nth-child(3) { width: 45px; }  /* Schalenfrüchte */
-        th:nth-child(4) { width: 40px; }  /* Fisch */
-        th:nth-child(5) { width: 40px; }  /* Eier */
-        th:nth-child(6) { width: 45px; }  /* Krebstiere */
-        th:nth-child(7) { width: 45px; }  /* Weichtiere */
-        th:nth-child(8) { width: 45px; }  /* Erdnüsse */
-        th:nth-child(9) { width: 40px; }  /* Sesam */
-        th:nth-child(10) { width: 40px; } /* Soja */
-        th:nth-child(11) { width: 45px; } /* Lupine */
-        th:nth-child(12) { width: 45px; } /* Sellerie */
-        th:nth-child(13) { width: 40px; } /* Senf */
-        th:nth-child(14) { width: 70px; } /* Milch & Laktose */
-        th:nth-child(15) { width: 45px; } /* Sulfite */
-        th:nth-child(16) { width: 60px; } /* Zusatzstoffe */
-        
         td {
-            padding: 5px 2px;
+            padding: 4px 2px;
             border: 1px solid #bdc3c7;
             text-align: center;
             vertical-align: middle;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            cursor: default;
+            transition: background-color 0.2s;
+            height: 32px;
         }
         
-        td:first-child {
-            text-align: left;
-            padding-left: 8px;
-            font-weight: 500;
+        td.allergen-active {
+            background-color: #ffebee;
+            border: 2px solid #e74c3c;
+        }
+        
+        td.allergen-selected {
+            background-color: #ffcdd2;
         }
         
         tr:nth-child(even) {
             background: #f8f9fa;
         }
         
+        /* Kategorie-Zeilen */
         tr.category-row {
             background: #3498db;
             color: white;
@@ -306,362 +324,774 @@
             border: 1px solid #2980b9;
             padding: 8px 5px;
             font-size: 0.9em;
+            text-align: left;
+            padding-left: 15px;
         }
         
-        tr.category-row td:first-child {
-            text-align: center;
+        .cell-content {
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2px;
         }
         
-        .x-mark {
-            color: #e74c3c;
+        .value-tag {
+            background: #e3f2fd;
+            padding: 2px 4px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: 600;
+            color: #1976d2;
+            display: inline-block;
+            cursor: default;
+        }
+        
+        /* Dropdown */
+        .custom-dropdown {
+            position: fixed;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 10000;
+            min-width: 220px;
+        }
+        
+        .dropdown-header {
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
             font-weight: bold;
-            font-size: 1.1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 5;
         }
         
-        .zusatz-nr {
-            color: #27ae60;
-            font-weight: bold;
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: #666;
+            padding: 0 5px;
         }
         
-        /* Footer mit Zusatzstoffe-Liste */
-        .zusatzstoffe-footer {
+        .close-btn:hover {
+            color: #000;
+        }
+        
+        .dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .dropdown-item.selected {
+            background-color: #bbdefb;
+        }
+        
+        .dropdown-item input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+            pointer-events: none;
+        }
+        
+        .dropdown-footer {
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+        }
+        
+        .dropdown-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .dropdown-btn.clear {
+            background: #f44336;
+            color: white;
+        }
+        
+        .dropdown-btn.clear:hover {
+            background: #d32f2f;
+        }
+        
+        .dropdown-btn.close {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .dropdown-btn.close:hover {
+            background: #45a049;
+        }
+        
+        /* Footer mit Erklärungen */
+        .explanations-footer {
             background: #f8f9fa;
             border-top: 2px solid #3498db;
-            padding: 10px 15px;
+            padding: 8px 15px;
             flex-shrink: 0;
+            font-size: 0.8em;
         }
         
-        .zusatzstoffe-title {
+        .explanation-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        
+        .explanation-title {
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 8px;
-            font-size: 0.9em;
+            min-width: 110px;
+            font-size: 0.85em;
         }
         
-        .zusatzstoffe-liste {
+        .explanation-items {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px 25px;
-            font-size: 0.8em;
-            color: #2c3e50;
+            gap: 8px 15px;
+            flex: 1;
         }
         
-        .zusatzstoffe-liste span {
+        .explanation-item {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 3px;
+            white-space: nowrap;
+        }
+        
+        .explanation-code {
+            font-weight: bold;
+            color: #e74c3c;
+            background: #ffebee;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
         }
         
         .zusatz-nummer {
             font-weight: bold;
             color: #27ae60;
             background: #e8f5e9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.85em;
-        }
-        
-        .hinweis-text {
-            background: #fff3cd;
-            border-top: 1px solid #ffeeba;
-            padding: 8px 15px;
-            font-size: 0.75em;
-            color: #856404;
-            text-align: center;
-            flex-shrink: 0;
-        }
-        
-        .hinweis-text p {
-            margin-bottom: 3px;
-        }
-        
-        .hinweis-text small {
-            color: #856404;
-            opacity: 0.9;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
         }
         
         .app-footer {
             background: #34495e;
             color: white;
             text-align: center;
-            padding: 6px;
-            font-size: 0.75em;
+            padding: 4px;
+            font-size: 0.7em;
             flex-shrink: 0;
+        }
+        
+        /* Edit Mode */
+        body.editing-enabled td:not(.category-row td) {
+            cursor: pointer;
+        }
+        
+        .edit-mode-indicator {
+            background: #27ae60;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header mit Logo und Zurück-Button -->
-        <div class="app-header no-print">
-            <div class="logo">
-                <div class="logo-icon">🍦</div>
-                <div>Die Primel Eiscafé</div>
+    <!-- PIN Modal -->
+    <div class="pin-modal" id="pinModal">
+        <div class="pin-box">
+            <h3>🔐 PIN für Bearbeitung</h3>
+            <input type="password" id="pinInput" maxlength="4" placeholder="****" inputmode="numeric" pattern="[0-9]*">
+            <div class="pin-buttons">
+                <button class="pin-btn primary" onclick="verifyPin()">Bestätigen</button>
+                <button class="pin-btn secondary" onclick="closePinModal()">Abbrechen</button>
             </div>
-            <button class="back-btn" onclick="goToIndex()">← Zurück zur Übersicht</button>
+            <div class="pin-error" id="pinError">Falscher PIN</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header mit Logo und Edit-Button -->
+        <div class="app-header">
+            <div class="logo">
+                <div class="logo-icon">🌡️</div>
+                <div>Primel Eiscafé - Temperaturkontrolle</div>
+            </div>
+            <div>
+                <button class="edit-btn" id="editBtn" onclick="startEditing()">✏️ Bearbeiten</button>
+                <button class="back-btn" onclick="window.location.href='index.html'">← Zurück</button>
+            </div>
         </div>
         
-        <!-- Seiten-Header (nicht fix) -->
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="month-selector">
+                <label>Monat / Jahr:</label>
+                <input type="month" id="monthSelector" value="2026-03">
+            </div>
+            <button class="btn btn-primary" onclick="loadMonth()">Laden</button>
+            <button class="btn btn-success" onclick="saveData()">💾 Speichern</button>
+            <button class="btn btn-print" onclick="window.print()">🖨️ Drucken</button>
+            <span id="editModeIndicator" class="edit-mode-indicator" style="display: none;">✏️ Bearbeitungsmodus</span>
+        </div>
+        
+        <!-- Page Header -->
         <div class="page-header">
-            <h2>Allergene und Zusatzstoffe</h2>
-            <div class="subtitle">Stand: 11.2025 · Primelweg 2 · 53229 Bonn</div>
+            <h2 id="pageTitle">Temperaturkontrolle - Allergene & Zusatzstoffe (03.2026)</h2>
         </div>
         
         <div class="content">
             <div class="page">
-                <!-- Table Container mit fixiertem Kopf -->
-                <div class="table-container" id="tableContainer"></div>
+                <!-- Table Container -->
+                <div class="table-container" id="tableContainer">
+                    <table id="allergeneTable">
+                        <thead>
+                            <tr>
+                                <th>Produkt</th>
+                                <th>Gluten</th>
+                                <th>Schalen-<br>früchte</th>
+                                <th>Fisch</th>
+                                <th>Eier</th>
+                                <th>Krebs-<br>tiere</th>
+                                <th>Weich-<br>tiere</th>
+                                <th>Erd-<br>nüsse</th>
+                                <th>Sesam</th>
+                                <th>Soja</th>
+                                <th>Lupine</th>
+                                <th>Sellerie</th>
+                                <th>Senf</th>
+                                <th>Milch &<br>Laktose</th>
+                                <th>Sulfite</th>
+                                <th>Zusatz-<br>stoffe</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
         
-        <!-- Zusatzstoffe Liste (neu) -->
-        <div class="zusatzstoffe-footer no-print">
-            <div class="zusatzstoffe-title">📋 Zusatzstoffe:</div>
-            <div class="zusatzstoffe-liste">
-                <span><span class="zusatz-nummer">(1)</span> mit Farbstoff</span>
-                <span><span class="zusatz-nummer">(2)</span> mit Konservierungsstoffen</span>
-                <span><span class="zusatz-nummer">(3)</span> Nitratpökelsalz</span>
-                <span><span class="zusatz-nummer">(4)</span> mit Antioxidationsmittel</span>
-                <span><span class="zusatz-nummer">(5)</span> mit Geschmacksverstärker</span>
-                <span><span class="zusatz-nummer">(6)</span> geschwefelt</span>
-                <span><span class="zusatz-nummer">(7)</span> geschwärzt</span>
-                <span><span class="zusatz-nummer">(8)</span> gewachst</span>
-                <span><span class="zusatz-nummer">(9)</span> mit Phosphat</span>
-                <span><span class="zusatz-nummer">(10)</span> mit Süßungsmitteln</span>
-                <span><span class="zusatz-nummer">(11)</span> mit Milcheiweiß</span>
-                <span><span class="zusatz-nummer">(12)</span> koffeinhaltig</span>
-                <span><span class="zusatz-nummer">(13)</span> alkoholhaltig</span>
-                <span><span class="zusatz-nummer">(14)</span> chininhaltig</span>
-                <span><span class="zusatz-nummer">(15)</span> enthält eine Phenylalaninquelle</span>
+        <!-- Erklärungen Footer -->
+        <div class="explanations-footer">
+            <div class="explanation-row">
+                <span class="explanation-title">🌾 Gluten:</span>
+                <div class="explanation-items">
+                    <span class="explanation-item"><span class="explanation-code">A1</span> Weizen</span>
+                    <span class="explanation-item"><span class="explanation-code">A2</span> Roggen</span>
+                    <span class="explanation-item"><span class="explanation-code">A3</span> Gerste</span>
+                    <span class="explanation-item"><span class="explanation-code">A4</span> Hafer</span>
+                    <span class="explanation-item"><span class="explanation-code">A5</span> Dinkel</span>
+                    <span class="explanation-item"><span class="explanation-code">A6</span> Kamut</span>
+                </div>
+            </div>
+            <div class="explanation-row">
+                <span class="explanation-title">🥜 Schalenfrüchte:</span>
+                <div class="explanation-items">
+                    <span class="explanation-item"><span class="explanation-code">H1</span> Mandel</span>
+                    <span class="explanation-item"><span class="explanation-code">H2</span> Haselnuss</span>
+                    <span class="explanation-item"><span class="explanation-code">H3</span> Walnuss</span>
+                    <span class="explanation-item"><span class="explanation-code">H4</span> Cashew</span>
+                    <span class="explanation-item"><span class="explanation-code">H5</span> Pekan</span>
+                    <span class="explanation-item"><span class="explanation-code">H6</span> Paranuss</span>
+                    <span class="explanation-item"><span class="explanation-code">H7</span> Pistazie</span>
+                    <span class="explanation-item"><span class="explanation-code">H8</span> Macadamia</span>
+                </div>
+            </div>
+            <div class="explanation-row">
+                <span class="explanation-title">🧪 Zusatzstoffe:</span>
+                <div class="explanation-items">
+                    <span class="explanation-item"><span class="zusatz-nummer">1</span> Farbstoff</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">2</span> Konservierungsstoffe</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">3</span> Nitratpökelsalz</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">4</span> Antioxidationsmittel</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">5</span> Geschmacksverstärker</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">6</span> geschwefelt</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">7</span> geschwärzt</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">8</span> gewachst</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">9</span> Phosphat</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">10</span> Süßungsmittel</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">11</span> Milcheiweiß</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">12</span> koffeinhaltig</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">13</span> alkoholhaltig</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">14</span> chininhaltig</span>
+                    <span class="explanation-item"><span class="zusatz-nummer">15</span> Phenylalanin</span>
+                </div>
             </div>
         </div>
         
-        <!-- Hinweis-Text -->
-        <div class="hinweis-text">
-            <p>Es kann keine Garantie für eine hundertprozentige Vollständigkeit der Angaben übernommen werden.</p>
-            <p>Kreuzkontaminationen bei den einzelnen Zutaten sowie technologisch unvermeidbare Verunreinigungen einzelner Produkte können nicht ausgeschlossen werden.</p>
-            <small>Die Vollständigkeit der Angaben übernommen werden.</small>
-        </div>
-        
-        <div class="app-footer no-print">
-            <p>Allergene und Zusatzstoffe · Stand: 11.2025</p>
+        <div class="app-footer">
+            <p>© 2026 Primel Eiscafé - Temperaturkontrolle</p>
         </div>
     </div>
 
     <script>
-        // Nummern-System (1-15)
-        const KATEGORIEN = [
-            "Gluten", "Schalenfrüchte", "Fisch", "Eier", "Krebstiere", 
-            "Weichtiere", "Erdnüsse", "Sesam", "Soja", "Lupine", 
-            "Sellerie", "Senf", "Milch & Laktose", "Sulfite", "Zusatzstoffe"
+        // ==================== PRODUKTDATEN MIT KATEGORIEN ====================
+        const categories = [
+            {
+                name: "🍦 Eissorten",
+                products: [
+                    "Vanille", "Schokolade", "Dunkel Schokolade", "Dubai Schokolade", 
+                    "Haselnuss", "Mokka", "Stracciatella", "Amarena", "Pistazie",
+                    "Joghurt", "Joghurt Mango", "After Eight", "Cookies", "Raffaello",
+                    "Rocher", "Donauwelle", "Karamell", "Snickers", "Nuttela",
+                    "Tiramisu", "Oreo", "Malaga", "Blauer Himmel", "Zitrone",
+                    "Erdbeere", "Himbeere", "Waldbeere", "Mango", "Maracuja",
+                    "Wasser Melone", "Banane"
+                ]
+            },
+            {
+                name: "🍨 Extra",
+                products: [
+                    "Sahne", "Eierlikör", "Nusslikör", "Krokant", "Amarena (Extra)",
+                    "Nuss", "Walnuss", "Schokosoße", "Schokoraspel", "Primelrolle",
+                    "Smarties", "Streusel", "Portion Obst", "Erdbeeren (Extra)",
+                    "Baileys", "Rum", "Amaretto"
+                ]
+            },
+            {
+                name: "🍧 Eisbecher",
+                products: [
+                    "Spaghetti-Eis", "Sp.Pisto", "Sp.Nero", "Sp.Erdbeeren", "Sp.Banane",
+                    "Sp.Spezial", "Sp.Kiwi", "Biene Maja", "Mickey Maus", "Pinocchio",
+                    "Erdbeer Becher", "Frucht-Becher", "After Eight Becher", "Italia-Becher",
+                    "Haselnuss Becher", "Cookies Becher", "Bananensplit", "Amarena Becher",
+                    "Yogurette Becher", "Schoko Becher", "Raffaello Becher", "Giotto Becher",
+                    "Toffifee Becher", "Karamell Becher", "Dubai-Becher", "Die Primelrolle (Becher)",
+                    "Joghurt Erdbeer", "Joghurt-Banane", "Joghurt Amarena", "Joghurt-Spezial",
+                    "Joghurt-Nuss", "Joghurt-Müsli", "Joghurt-Kiwi", "Amaretto Becher",
+                    "Malaga-Becher", "Eierlikör Becher", "Krokant-Becher", "Tiramisu Becher",
+                    "Mokka-Becher"
+                ]
+            },
+            {
+                name: "🥤 Getränke / Shakes",
+                products: [
+                    "Kaffee", "Cappuccino", "Espresso", "Milchkaffee", "Latte Macchiato",
+                    "Affogato", "Americano", "Kakao", "Kakao mit Sahne", "TEE",
+                    "Frischer Orangensaft", "Cola", "Cola light", "Cola Zeero", "Lemo, Orange",
+                    "Apfelschorle", "Milchshake", "Milchshake mit Sahne", "Wasser",
+                    "Tonic Water", "Eiskakao", "Eiskaffee", "Eislatte", "Bier alkoholfrei"
+                ]
+            },
+            {
+                name: "🧇 Waffel",
+                products: [
+                    "Waffel-Puderzucker", "Waffel-Klassik", "Banane, Zimt", "Tutti Frutti",
+                    "Waffel-Amarena", "Waffel Heiße Kirsche", "Waffel-Erdbeer"
+                ]
+            }
         ];
         
-        // ==================== PRODUKTDATEN ====================
-        const produkte = [
-            // ===== Eissorten =====
-            { kategorie: "Eissorten", name: "Vanille", nummern: [13] },
-            { kategorie: "Eissorten", name: "Schokolade", nummern: [13] },
-            { kategorie: "Eissorten", name: "Dunkel Schokolade", nummern: [1, 2, 13] },
-            { kategorie: "Eissorten", name: "Dubai Schokolade", nummern: [1, 13] },
-            { kategorie: "Eissorten", name: "Haselnuss", nummern: [2, 13] },
-            { kategorie: "Eissorten", name: "Mokka", nummern: [13, "z12"] },
-            { kategorie: "Eissorten", name: "Stracciatella", nummern: [13] },
-            { kategorie: "Eissorten", name: "Amarena", nummern: [13] },
-            { kategorie: "Eissorten", name: "Pistazie", nummern: [2, 13] },
-            { kategorie: "Eissorten", name: "Joghurt", nummern: [13] },
-            { kategorie: "Eissorten", name: "Joghurt Mango", nummern: [13] },
-            { kategorie: "Eissorten", name: "After Eight", nummern: [13] },
-            { kategorie: "Eissorten", name: "Cookies", nummern: [1, 2, 4, 9, 13] },
-            { kategorie: "Eissorten", name: "Raffaello", nummern: [2, 13] },
-            { kategorie: "Eissorten", name: "Rocher", nummern: [2, 13] },
-            { kategorie: "Eissorten", name: "Donauwelle", nummern: [13] },
-            { kategorie: "Eissorten", name: "Karamell", nummern: [13] },
-            { kategorie: "Eissorten", name: "Snickers", nummern: [7, 13] },
-            { kategorie: "Eissorten", name: "Nuttela", nummern: [2, 13] },
-            { kategorie: "Eissorten", name: "Tiramisu", nummern: [1, 13, "z13"] },
-            { kategorie: "Eissorten", name: "Oreo", nummern: [1, 13] },
-            { kategorie: "Eissorten", name: "Malaga", nummern: [13, "z13"] },
-            { kategorie: "Eissorten", name: "Blauer Himmel", nummern: [13, "z1", "z5", "z10"] },
-            { kategorie: "Eissorten", name: "Zitrone", nummern: [0] },
-            { kategorie: "Eissorten", name: "Erdbeere", nummern: [0] },
-            { kategorie: "Eissorten", name: "Himbeere", nummern: [0] },
-            { kategorie: "Eissorten", name: "Waldbeere", nummern: [0] },
-            { kategorie: "Eissorten", name: "Mango", nummern: [0] },
-            { kategorie: "Eissorten", name: "Maracuja", nummern: [0] },
-            { kategorie: "Eissorten", name: "Wasser", nummern: [0] },
-            { kategorie: "Eissorten", name: "Melone", nummern: [0] },
-            { kategorie: "Eissorten", name: "Banane", nummern: [0] },
-            
-            // ===== Extra =====
-            { kategorie: "Extra", name: "Sahne", nummern: [13] },
-            { kategorie: "Extra", name: "Eierlikör", nummern: [4, 9, "z13"] },
-            { kategorie: "Extra", name: "Nusslikör", nummern: [2, "z13"] },
-            { kategorie: "Extra", name: "Krokant", nummern: [2] },
-            { kategorie: "Extra", name: "Amarena", nummern: [0] },
-            { kategorie: "Extra", name: "Nuss", nummern: [2] },
-            { kategorie: "Extra", name: "Walnuss", nummern: [2] },
-            { kategorie: "Extra", name: "Schokosoße", nummern: [2, 13] },
-            { kategorie: "Extra", name: "Schokoraspel", nummern: [13] },
-            { kategorie: "Extra", name: "Primelrolle", nummern: [1, 2, 13] },
-            { kategorie: "Extra", name: "Smarties", nummern: [13, "z1"] },
-            { kategorie: "Extra", name: "Streusel", nummern: ["z1"] },
-            { kategorie: "Extra", name: "Portion Obst", nummern: [0] },
-            { kategorie: "Extra", name: "Erdbeeren", nummern: [0] },
-            { kategorie: "Extra", name: "Baileys", nummern: [13, "z1", "z13"] },
-            { kategorie: "Extra", name: "Rum", nummern: ["z13"] },
-            { kategorie: "Extra", name: "Amaretto", nummern: ["z13"] },
-            
-            // ===== Eisbecher =====
-            { kategorie: "Eisbecher", name: "Spaghetti-Eis", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Sp.Pisto", nummern: [2, 13] },
-            { kategorie: "Eisbecher", name: "Sp.Nero", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Sp.Erdbeeren", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Sp.Banane", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Sp.Spezial", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Sp.Kiwi", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Biene Maja", nummern: [1, 13] },
-            { kategorie: "Eisbecher", name: "Mickey Maus", nummern: [1, 13] },
-            { kategorie: "Eisbecher", name: "Pinocchio", nummern: [1, 13] },
-            { kategorie: "Eisbecher", name: "Erdbeer Becher", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Frucht-Becher", nummern: [13] },
-            { kategorie: "Eisbecher", name: "After Eight Becher", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Italia-Becher", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Haselnuss Becher", nummern: [2, 13] },
-            { kategorie: "Eisbecher", name: "Cookies Becher", nummern: [1, 2, 4, 9, 13] },
-            { kategorie: "Eisbecher", name: "Bananensplit", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Amarena Becher", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Yogurette Becher", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Schoko Becher", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Raffaello Becher", nummern: [1, 2, 13] },
-            { kategorie: "Eisbecher", name: "Giotto Becher", nummern: [1, 2, 13] },
-            { kategorie: "Eisbecher", name: "Toffifee Becher", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Karamell Becher", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Dubai-Becher", nummern: [1, 2, 13] },
-            { kategorie: "Eisbecher", name: "Die Primelrolle", nummern: [1, 2, 13] },
-            { kategorie: "Eisbecher", name: "Joghurt Erdbeer", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Joghurt-Banane", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Joghurt Amarena", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Joghurt-Spezial", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Joghurt-Nuss", nummern: [2, 13] },
-            { kategorie: "Eisbecher", name: "Joghurt-Müsli", nummern: [2, 13] },
-            { kategorie: "Eisbecher", name: "Joghurt-Kiwi", nummern: [13] },
-            { kategorie: "Eisbecher", name: "Amaretto Becher", nummern: [1, 13, "z13"] },
-            { kategorie: "Eisbecher", name: "Malaga-Becher", nummern: [13, "z13"] },
-            { kategorie: "Eisbecher", name: "Eierlikör Becher", nummern: [4, 9, 13, "z13"] },
-            { kategorie: "Eisbecher", name: "Krokant-Becher", nummern: [2, 13, "z13"] },
-            { kategorie: "Eisbecher", name: "Tiramisu Becher", nummern: [1, 2, 13, "z13"] },
-            { kategorie: "Eisbecher", name: "Mokka-Becher", nummern: [13, "z12", "z13"] },
-            
-            // ===== Getränke / Shakes =====
-            { kategorie: "Getränke / Shakes", name: "Kaffee", nummern: ["z12"] },
-            { kategorie: "Getränke / Shakes", name: "Cappuccino", nummern: [13, "z12"] },
-            { kategorie: "Getränke / Shakes", name: "Espresso", nummern: ["z12"] },
-            { kategorie: "Getränke / Shakes", name: "Milchkaffee", nummern: [13, "z12"] },
-            { kategorie: "Getränke / Shakes", name: "Latte Macchiato", nummern: [13, "z12"] },
-            { kategorie: "Getränke / Shakes", name: "Affogato", nummern: [13, "z12"] },
-            { kategorie: "Getränke / Shakes", name: "Americano", nummern: ["z12"] },
-            { kategorie: "Getränke / Shakes", name: "Kakao", nummern: [2, 13] },
-            { kategorie: "Getränke / Shakes", name: "Kakao mit Sahne", nummern: [2, 13] },
-            { kategorie: "Getränke / Shakes", name: "TEE", nummern: [0] },
-            { kategorie: "Getränke / Shakes", name: "Frischer Orangensaft", nummern: [0] },
-            { kategorie: "Getränke / Shakes", name: "Cola", nummern: ["z1", "z12"] },
-            { kategorie: "Getränke / Shakes", name: "Cola light", nummern: ["z1", "z2", "z10", "z12", "z15"] },
-            { kategorie: "Getränke / Shakes", name: "Cola Zeero", nummern: ["z1", "z2", "z10", "z12", "z15"] },
-            { kategorie: "Getränke / Shakes", name: "Lemo, Orange", nummern: ["z1", "z4", "z12"] },
-            { kategorie: "Getränke / Shakes", name: "Apfelschorle", nummern: ["z2"] },
-            { kategorie: "Getränke / Shakes", name: "Milchshake", nummern: [13] },
-            { kategorie: "Getränke / Shakes", name: "Milchshake mit Sahne", nummern: [13] },
-            { kategorie: "Getränke / Shakes", name: "Wasser", nummern: [0] },
-            { kategorie: "Getränke / Shakes", name: "Tonic Water", nummern: ["z2", "z4"] },
-            { kategorie: "Getränke / Shakes", name: "Eiskakao", nummern: [2, 13] },
-            { kategorie: "Getränke / Shakes", name: "Eiskaffee", nummern: [13, "z12"] },
-            { kategorie: "Getränke / Shakes", name: "Eislatte", nummern: ["z12"] },
-            { kategorie: "Getränke / Shakes", name: "Bier alkoholfrei", nummern: [0] },
-            
-            // ===== Waffel =====
-            { kategorie: "Waffel", name: "Waffel-Puderzucker", nummern: [1, 4, 13] },
-            { kategorie: "Waffel", name: "Waffel-Klassik", nummern: [1, 4, 13] },
-            { kategorie: "Waffel", name: "Banane, Zimt", nummern: [1, 4, 13] },
-            { kategorie: "Waffel", name: "Tutti Frutti", nummern: [1, 4, 13] },
-            { kategorie: "Waffel", name: "Waffel-Amarena", nummern: [1, 4, 13] },
-            { kategorie: "Waffel", name: "Waffel Heiße Kirsche", nummern: [1, 4, 13] },
-            { kategorie: "Waffel", name: "Waffel-Erdbeer", nummern: [1, 4, 13] }
-        ];
+        // ==================== DROPDOWN OPTIONEN ====================
+        const dropdownOptions = {
+            1: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'], // Gluten
+            2: ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8'], // Schalenfrüchte
+            15: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'] // Zusatzstoffe
+        };
         
-        // ==================== TABELLE BAUEN ====================
+        // ==================== STATE ====================
+        let isEditing = false;
+        let activeCell = null;
+        let activeDropdown = null;
+        let cellData = {};
+        let productIndexMap = {}; // Mapping von Produktnamen zu Index
+        
+        // ==================== INITIALISIERUNG ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            buildProductIndexMap();
+            buildTable();
+            loadSavedData();
+            loadMonth();
+        });
+        
+        // ==================== PRODUCT INDEX MAP ====================
+        function buildProductIndexMap() {
+            let index = 0;
+            categories.forEach(category => {
+                category.products.forEach(product => {
+                    productIndexMap[product] = index++;
+                });
+            });
+        }
+        
+        // ==================== PIN FUNKTIONEN ====================
+        function startEditing() {
+            document.getElementById('pinModal').classList.add('show');
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinError').style.display = 'none';
+            document.getElementById('pinInput').focus();
+        }
+        
+        function closePinModal() {
+            document.getElementById('pinModal').classList.remove('show');
+        }
+        
+        function verifyPin() {
+            const pin = document.getElementById('pinInput').value;
+            if (pin === '1234') {
+                isEditing = true;
+                document.body.classList.add('editing-enabled');
+                document.getElementById('editModeIndicator').style.display = 'inline-block';
+                document.getElementById('editBtn').classList.add('active');
+                closePinModal();
+                
+                setTimeout(() => {
+                    alert('✅ Bearbeitungsmodus aktiviert für 5 Minuten');
+                }, 100);
+                
+                setTimeout(() => {
+                    if (isEditing) {
+                        stopEditing();
+                        alert('⏰ Bearbeitungsmodus automatisch deaktiviert');
+                    }
+                }, 300000);
+            } else {
+                document.getElementById('pinError').style.display = 'block';
+                document.getElementById('pinInput').value = '';
+            }
+        }
+        
+        function stopEditing() {
+            isEditing = false;
+            document.body.classList.remove('editing-enabled');
+            document.getElementById('editModeIndicator').style.display = 'none';
+            document.getElementById('editBtn').classList.remove('active');
+            
+            if (activeDropdown) {
+                activeDropdown.remove();
+                activeDropdown = null;
+            }
+            if (activeCell) {
+                activeCell.classList.remove('allergen-active');
+                activeCell = null;
+            }
+        }
+        
+        // ==================== TABLELLE BAUEN ====================
         function buildTable() {
-            let html = `<table>
-                <thead>
-                    <tr>
-                        <th>Produkt</th>
-                        <th>Gluten</th>
-                        <th>Schalen-<br>früchte</th>
-                        <th>Fisch</th>
-                        <th>Eier</th>
-                        <th>Krebs-<br>tiere</th>
-                        <th>Weich-<br>tiere</th>
-                        <th>Erd-<br>nüsse</th>
-                        <th>Sesam</th>
-                        <th>Soja</th>
-                        <th>Lupine</th>
-                        <th>Sellerie</th>
-                        <th>Senf</th>
-                        <th>Milch &<br>Laktose</th>
-                        <th>Sulfite</th>
-                        <th>Zusatz-<br>stoffe</th>
-                    </tr>
-                </thead>
-                <tbody>`;
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) return;
             
-            let currentCategory = "";
+            tbody.innerHTML = '';
             
-            produkte.forEach(produkt => {
-                // Kategorieüberschrift
-                if (produkt.kategorie !== currentCategory) {
-                    currentCategory = produkt.kategorie;
-                    html += `<tr class="category-row"><td colspan="16">🍦 ${currentCategory}</td></tr>`;
-                }
+            categories.forEach(category => {
+                // Kategorie-Zeile einfügen
+                const categoryRow = document.createElement('tr');
+                categoryRow.className = 'category-row';
+                const categoryCell = document.createElement('td');
+                categoryCell.colSpan = 16;
+                categoryCell.textContent = category.name;
+                categoryRow.appendChild(categoryCell);
+                tbody.appendChild(categoryRow);
                 
-                html += `<tr>`;
-                html += `<td>${produkt.name}</td>`;
-                
-                // Sammle alle z-Nummern für Zusatzstoffe (Spalte 15)
-                const zNummern = produkt.nummern
-                    .filter(n => typeof n === 'string' && n.startsWith('z'))
-                    .map(n => parseInt(n.substring(1)))
-                    .sort((a, b) => a - b);
-                
-                // 15 Spalten (1-15)
-                for (let i = 1; i <= 15; i++) {
-                    const nummern = produkt.nummern;
+                // Produkte der Kategorie
+                category.products.forEach(product => {
+                    const productIndex = productIndexMap[product];
+                    const row = document.createElement('tr');
                     
-                    // Prüfen ob normale Nummer (i) vorhanden ist
-                    if (nummern.includes(i)) {
-                        html += `<td class="x-mark">X</td>`;
+                    // Produktname
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = product;
+                    nameCell.style.fontWeight = '500';
+                    nameCell.style.textAlign = 'left';
+                    nameCell.style.paddingLeft = '15px';
+                    nameCell.style.cursor = 'default';
+                    row.appendChild(nameCell);
+                    
+                    // 15 Allergen-Spalten
+                    for (let col = 1; col <= 15; col++) {
+                        const cell = document.createElement('td');
+                        cell.dataset.productIndex = productIndex;
+                        cell.dataset.column = col;
+                        cell.dataset.productName = product;
+                        
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'cell-content';
+                        contentDiv.id = `cell-${productIndex}-${col}`;
+                        cell.appendChild(contentDiv);
+                        
+                        cell.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            onCellClick(e, cell, productIndex, col);
+                        });
+                        
+                        row.appendChild(cell);
                     }
-                    // Für Spalte 15: z-Nummern als Text
-                    else if (i === 15 && zNummern.length > 0) {
-                        html += `<td class="zusatz-nr">${zNummern.join(',')}</td>`;
-                    }
-                    else {
-                        html += `<td></td>`;
-                    }
+                    
+                    tbody.appendChild(row);
+                });
+            });
+        }
+        
+        // ==================== ZELLKLICK HANDLER ====================
+        function onCellClick(event, cell, productIndex, column) {
+            event.stopPropagation();
+            
+            if (!isEditing) return;
+            
+            if (activeCell === cell) {
+                clearCell(productIndex, column);
+                cell.classList.remove('allergen-active');
+                activeCell = null;
+                
+                if (activeDropdown) {
+                    activeDropdown.remove();
+                    activeDropdown = null;
+                }
+                return;
+            }
+            
+            if (activeCell) {
+                activeCell.classList.remove('allergen-active');
+            }
+            
+            cell.classList.add('allergen-active');
+            activeCell = cell;
+            
+            if (activeDropdown) {
+                activeDropdown.remove();
+                activeDropdown = null;
+            }
+            
+            if (dropdownOptions[column]) {
+                showDropdown(event, cell, productIndex, column, dropdownOptions[column]);
+            } else {
+                toggleSimpleCell(productIndex, column, cell);
+            }
+        }
+        
+        // ==================== EINFACHE ZELLE UMSCHALTEN ====================
+        function toggleSimpleCell(productIndex, column, cell) {
+            const key = `${productIndex}-${column}`;
+            
+            if (cellData[key]) {
+                delete cellData[key];
+                updateCellValue(productIndex, column, '');
+                cell.classList.remove('allergen-selected');
+            } else {
+                cellData[key] = 'X';
+                updateCellValue(productIndex, column, 'X');
+                cell.classList.add('allergen-selected');
+            }
+            
+            cell.classList.remove('allergen-active');
+            activeCell = null;
+        }
+        
+        // ==================== ZELLE LEEREN ====================
+        function clearCell(productIndex, column) {
+            const key = `${productIndex}-${column}`;
+            delete cellData[key];
+            
+            updateCellValue(productIndex, column, '');
+            
+            const cell = document.querySelector(`td[data-product-index="${productIndex}"][data-column="${column}"]`);
+            if (cell) {
+                cell.classList.remove('allergen-selected');
+            }
+        }
+        
+        // ==================== DROPDOWN ANZEIGEN ====================
+        function showDropdown(event, cell, productIndex, column, options) {
+            if (activeDropdown) {
+                activeDropdown.remove();
+            }
+            
+            const dropdown = document.createElement('div');
+            dropdown.className = 'custom-dropdown';
+            
+            const rect = cell.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+            dropdown.style.left = (rect.left + window.scrollX) + 'px';
+            
+            const key = `${productIndex}-${column}`;
+            const currentValues = cellData[key] ? cellData[key].split(',').map(v => v.trim()) : [];
+            
+            const header = document.createElement('div');
+            header.className = 'dropdown-header';
+            header.innerHTML = `
+                <span>Optionen wählen</span>
+                <button class="close-btn" onclick="event.stopPropagation(); this.closest('.custom-dropdown').remove(); if(activeCell) activeCell.classList.remove('allergen-active'); activeCell = null; activeDropdown = null;">✕</button>
+            `;
+            dropdown.appendChild(header);
+            
+            options.forEach(option => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                if (currentValues.includes(option)) {
+                    item.classList.add('selected');
                 }
                 
-                html += `</tr>`;
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = option;
+                checkbox.checked = currentValues.includes(option);
+                
+                const label = document.createElement('span');
+                label.textContent = option;
+                
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    checkbox.checked = !checkbox.checked;
+                    
+                    if (checkbox.checked) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+                
+                dropdown.appendChild(item);
             });
             
-            html += `</tbody></table>`;
-            document.getElementById('tableContainer').innerHTML = html;
+            const footer = document.createElement('div');
+            footer.className = 'dropdown-footer';
+            
+            const clearBtn = document.createElement('button');
+            clearBtn.className = 'dropdown-btn clear';
+            clearBtn.textContent = 'Alle löschen';
+            clearBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.dropdown-item').classList.remove('selected');
+                });
+                
+                delete cellData[key];
+                updateCellValue(productIndex, column, '');
+                cell.classList.remove('allergen-selected');
+            });
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'dropdown-btn close';
+            closeBtn.textContent = 'Fertig';
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                const selected = [];
+                dropdown.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                    selected.push(cb.value);
+                });
+                
+                if (selected.length > 0) {
+                    cellData[key] = selected.join(', ');
+                    updateCellValue(productIndex, column, selected.join(', '));
+                    cell.classList.add('allergen-selected');
+                } else {
+                    delete cellData[key];
+                    updateCellValue(productIndex, column, '');
+                    cell.classList.remove('allergen-selected');
+                }
+                
+                dropdown.remove();
+                if (activeCell) {
+                    activeCell.classList.remove('allergen-active');
+                    activeCell = null;
+                }
+                activeDropdown = null;
+            });
+            
+            footer.appendChild(clearBtn);
+            footer.appendChild(closeBtn);
+            dropdown.appendChild(footer);
+            
+            document.body.appendChild(dropdown);
+            activeDropdown = dropdown;
         }
         
-        // ==================== NAVIGATION ====================
-        function goToIndex() {
-            window.location.href = 'index.html';
+        // ==================== ZELLWERT AKTUALISIEREN ====================
+        function updateCellValue(productIndex, column, value) {
+            const contentDiv = document.getElementById(`cell-${productIndex}-${column}`);
+            if (!contentDiv) return;
+            
+            contentDiv.innerHTML = '';
+            
+            if (value && value !== '') {
+                const values = value.split(',').map(v => v.trim());
+                values.forEach(val => {
+                    const tag = document.createElement('span');
+                    tag.className = 'value-tag';
+                    tag.textContent = val;
+                    contentDiv.appendChild(tag);
+                });
+            }
         }
         
-        // Tabelle beim Laden bauen
-        document.addEventListener('DOMContentLoaded', buildTable);
+        // ==================== DATEN SPEICHERN ====================
+        function saveData() {
+            localStorage.setItem('temperaturkontrolle_data', JSON.stringify(cellData));
+            alert('✅ Daten wurden gespeichert');
+        }
+        
+        // ==================== DATEN LADEN ====================
+        function loadSavedData() {
+            const saved = localStorage.getItem('temperaturkontrolle_data');
+            if (saved) {
+                try {
+                    cellData = JSON.parse(saved);
+                    
+                    Object.keys(cellData).forEach(key => {
+                        const [productIndex, column] = key.split('-').map(Number);
+                        const value = cellData[key];
+                        
+                        if (value && value !== '') {
+                            updateCellValue(productIndex, column, value);
+                            
+                            const cell = document.querySelector(`td[data-product-index="${productIndex}"][data-column="${column}"]`);
+                            if (cell) {
+                                cell.classList.add('allergen-selected');
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.error('Fehler beim Laden der Daten', e);
+                }
+            }
+        }
+        
+        // ==================== MONAT LADEN ====================
+        function loadMonth() {
+            const monthSelector = document.getElementById('monthSelector');
+            const [year, month] = monthSelector.value.split('-');
+            document.getElementById('pageTitle').textContent = 
+                `Temperaturkontrolle - Allergene & Zusatzstoffe (${month}.${year})`;
+        }
     </script>
 </body>
 </html>
