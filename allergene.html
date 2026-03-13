@@ -348,21 +348,39 @@
             cursor: default;
         }
         
-        /* Dropdown */
+        /* Dropdown - jetzt zentriert und besser positioniert */
         .custom-dropdown {
             position: fixed;
             background: white;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            max-height: 350px;
             overflow-y: auto;
             z-index: 10000;
-            min-width: 220px;
+            min-width: 260px;
+            transform: translateX(-50%) translateY(10px);
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%);
+            max-width: 90vw;
+        }
+        
+        /* Für mobile Anpassung */
+        @media (max-width: 768px) {
+            .custom-dropdown {
+                width: 90%;
+                left: 5% !important;
+                transform: translateY(10px);
+                top: auto !important;
+                bottom: 10px;
+                left: 5% !important;
+                transform: none;
+            }
         }
         
         .dropdown-header {
-            padding: 8px 12px;
+            padding: 12px 15px;
             background: #f5f5f5;
             border-bottom: 1px solid #ddd;
             font-weight: bold;
@@ -372,6 +390,7 @@
             position: sticky;
             top: 0;
             z-index: 5;
+            border-radius: 8px 8px 0 0;
         }
         
         .close-btn {
@@ -380,7 +399,7 @@
             font-size: 1.2em;
             cursor: pointer;
             color: #666;
-            padding: 0 5px;
+            padding: 0 8px;
         }
         
         .close-btn:hover {
@@ -388,13 +407,13 @@
         }
         
         .dropdown-item {
-            padding: 8px 12px;
+            padding: 10px 15px;
             cursor: pointer;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 0.85em;
+            font-size: 0.9em;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
         .dropdown-item:hover {
@@ -409,10 +428,12 @@
             margin: 0;
             cursor: pointer;
             pointer-events: none;
+            width: 18px;
+            height: 18px;
         }
         
         .dropdown-footer {
-            padding: 8px 12px;
+            padding: 12px 15px;
             background: #f5f5f5;
             border-top: 1px solid #ddd;
             display: flex;
@@ -420,14 +441,15 @@
             position: sticky;
             bottom: 0;
             z-index: 5;
+            border-radius: 0 0 8px 8px;
         }
         
         .dropdown-btn {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 0.9em;
             font-weight: 600;
         }
         
@@ -526,9 +548,28 @@
             font-size: 0.75em;
             margin-left: 10px;
         }
+
+        /* Overlay für Dropdown-Hintergrund */
+        .dropdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 9999;
+            display: none;
+        }
+        
+        .dropdown-overlay.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
+    <!-- Overlay für Dropdown -->
+    <div class="dropdown-overlay" id="dropdownOverlay" onclick="closeDropdown()"></div>
+
     <!-- PIN Modal -->
     <div class="pin-modal" id="pinModal">
         <div class="pin-box">
@@ -569,7 +610,7 @@
         
         <!-- Page Header -->
         <div class="page-header">
-            <h2 id="pageTitle">Temperaturkontrolle - Allergene & Zusatzstoffe (03.2026)</h2>
+            <h2 id="pageTitle">Allergene & Zusatzstoffe (03.2026)</h2>
         </div>
         
         <div class="content">
@@ -652,7 +693,7 @@
         </div>
         
         <div class="app-footer">
-            <p>© 2026 Die Primel Eiscafé</p>
+            <p>© 2026 Primel Eiscafé</p>
         </div>
     </div>
 
@@ -668,7 +709,7 @@
                     "Rocher", "Donauwelle", "Karamell", "Snickers", "Nuttela",
                     "Tiramisu", "Oreo", "Malaga", "Blauer Himmel", "Zitrone",
                     "Erdbeere", "Himbeere", "Waldbeere", "Mango", "Maracuja",
-                    "Wasser Melone", "Banane"
+                    "Wasser", "Melone", "Banane"
                 ]
             },
             {
@@ -789,6 +830,11 @@
             document.getElementById('editModeIndicator').style.display = 'none';
             document.getElementById('editBtn').classList.remove('active');
             
+            closeDropdown();
+        }
+        
+        // ==================== DROPDOWN SCHLIESSEN ====================
+        function closeDropdown() {
             if (activeDropdown) {
                 activeDropdown.remove();
                 activeDropdown = null;
@@ -797,6 +843,7 @@
                 activeCell.classList.remove('allergen-active');
                 activeCell = null;
             }
+            document.getElementById('dropdownOverlay').classList.remove('show');
         }
         
         // ==================== TABLELLE BAUEN ====================
@@ -865,11 +912,7 @@
                 clearCell(productIndex, column);
                 cell.classList.remove('allergen-active');
                 activeCell = null;
-                
-                if (activeDropdown) {
-                    activeDropdown.remove();
-                    activeDropdown = null;
-                }
+                closeDropdown();
                 return;
             }
             
@@ -880,10 +923,7 @@
             cell.classList.add('allergen-active');
             activeCell = cell;
             
-            if (activeDropdown) {
-                activeDropdown.remove();
-                activeDropdown = null;
-            }
+            closeDropdown(); // Vorheriges Dropdown schließen
             
             if (dropdownOptions[column]) {
                 showDropdown(event, cell, productIndex, column, dropdownOptions[column]);
@@ -925,25 +965,20 @@
         
         // ==================== DROPDOWN ANZEIGEN ====================
         function showDropdown(event, cell, productIndex, column, options) {
-            if (activeDropdown) {
-                activeDropdown.remove();
-            }
-            
             const dropdown = document.createElement('div');
             dropdown.className = 'custom-dropdown';
             
-            const rect = cell.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
-            dropdown.style.left = (rect.left + window.scrollX) + 'px';
-            
             const key = `${productIndex}-${column}`;
             const currentValues = cellData[key] ? cellData[key].split(',').map(v => v.trim()) : [];
+            
+            // Overlay anzeigen
+            document.getElementById('dropdownOverlay').classList.add('show');
             
             const header = document.createElement('div');
             header.className = 'dropdown-header';
             header.innerHTML = `
                 <span>Optionen wählen</span>
-                <button class="close-btn" onclick="event.stopPropagation(); this.closest('.custom-dropdown').remove(); if(activeCell) activeCell.classList.remove('allergen-active'); activeCell = null; activeDropdown = null;">✕</button>
+                <button class="close-btn" onclick="event.stopPropagation(); closeDropdown();">✕</button>
             `;
             dropdown.appendChild(header);
             
@@ -1019,12 +1054,7 @@
                     cell.classList.remove('allergen-selected');
                 }
                 
-                dropdown.remove();
-                if (activeCell) {
-                    activeCell.classList.remove('allergen-active');
-                    activeCell = null;
-                }
-                activeDropdown = null;
+                closeDropdown();
             });
             
             footer.appendChild(clearBtn);
