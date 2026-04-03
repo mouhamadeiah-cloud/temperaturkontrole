@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Primel Eiscafé - Temperaturkontrolle</title>
     <style>
         * {
@@ -272,7 +272,7 @@
             border: 1px solid #34495e;
             font-size: 0.8em;
             table-layout: fixed;
-            min-width: 1200px;
+            min-width: 1300px;
         }
         
         th {
@@ -348,7 +348,26 @@
             cursor: default;
         }
         
-        /* Dropdown - jetzt zentriert und besser positioniert */
+        /* Hinweis-Spalte */
+        .hinweis-cell {
+            cursor: pointer;
+            text-align: left;
+            vertical-align: middle;
+        }
+        
+        .hinweis-text {
+            font-size: 0.75em;
+            color: #2c3e50;
+            line-height: 1.3;
+            word-break: break-word;
+            white-space: normal;
+            display: inline-block;
+            width: 100%;
+            text-align: left;
+            padding: 0 4px;
+        }
+        
+        /* Dropdown - zentriert */
         .custom-dropdown {
             position: fixed;
             background: white;
@@ -359,23 +378,19 @@
             overflow-y: auto;
             z-index: 10000;
             min-width: 260px;
-            transform: translateX(-50%) translateY(10px);
-            left: 50% !important;
-            top: 50% !important;
+            left: 50%;
+            top: 50%;
             transform: translate(-50%, -50%);
             max-width: 90vw;
         }
         
-        /* Für mobile Anpassung */
         @media (max-width: 768px) {
             .custom-dropdown {
                 width: 90%;
-                left: 5% !important;
+                left: 5%;
                 transform: translateY(10px);
-                top: auto !important;
+                top: auto;
                 bottom: 10px;
-                left: 5% !important;
-                transform: none;
             }
         }
         
@@ -469,6 +484,80 @@
         
         .dropdown-btn.close:hover {
             background: #45a049;
+        }
+        
+        /* Hinweis-Editor Modal */
+        .hinweis-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+        }
+        
+        .hinweis-modal.show {
+            display: flex;
+        }
+        
+        .hinweis-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            width: 400px;
+            max-width: 90%;
+        }
+        
+        .hinweis-box h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .hinweis-box textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+        
+        .hinweis-box textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .hinweis-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .hinweis-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .hinweis-btn.save {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .hinweis-btn.cancel {
+            background: #95a5a6;
+            color: white;
         }
         
         /* Footer mit Erklärungen */
@@ -583,12 +672,24 @@
         </div>
     </div>
 
+    <!-- Hinweis-Editor Modal -->
+    <div class="hinweis-modal" id="hinweisModal">
+        <div class="hinweis-box">
+            <h3>📝 Hinweis bearbeiten</h3>
+            <textarea id="hinweisTextarea" rows="3" placeholder="Hinweis eingeben..."></textarea>
+            <div class="hinweis-buttons">
+                <button class="hinweis-btn cancel" onclick="closeHinweisModal()">Abbrechen</button>
+                <button class="hinweis-btn save" onclick="saveHinweis()">Speichern</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Header mit Logo und Edit-Button -->
         <div class="app-header">
             <div class="logo">
                 <div class="logo-icon">🌡️</div>
-                <div>Die Primel Eiscafé</div>
+                <div>Primel Eiscafé - Temperaturkontrolle</div>
             </div>
             <div>
                 <button class="edit-btn" id="editBtn" onclick="startEditing()">✏️ Bearbeiten</button>
@@ -610,7 +711,7 @@
         
         <!-- Page Header -->
         <div class="page-header">
-            <h2 id="pageTitle">Allergene & Zusatzstoffe (03.2026)</h2>
+            <h2 id="pageTitle">Temperaturkontrolle - Allergene & Zusatzstoffe (03.2026)</h2>
         </div>
         
         <div class="content">
@@ -636,6 +737,7 @@
                                 <th>Milch &<br>Laktose</th>
                                 <th>Sulfite</th>
                                 <th>Zusatz-<br>stoffe</th>
+                                <th style="min-width: 100px;">Hinweis</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody"></tbody>
@@ -693,7 +795,7 @@
         </div>
         
         <div class="app-footer">
-            <p>© 2026 Primel Eiscafé</p>
+            <p>© 2026 Primel Eiscafé - Temperaturkontrolle</p>
         </div>
     </div>
 
@@ -705,11 +807,11 @@
                 products: [
                     "Vanille", "Schokolade", "Dunkel Schokolade", "Dubai Schokolade", 
                     "Haselnuss", "Mokka", "Stracciatella", "Amarena", "Pistazie",
-                    "Joghurt", "Joghurt Mango", "After Eight", "Cookies", "lotos", "Raffaello",
+                    "Joghurt", "Joghurt Mango", "After Eight", "Cookies", "Raffaello",
                     "Rocher", "Donauwelle", "Karamell", "Snickers", "Nuttela",
                     "Tiramisu", "Oreo", "Malaga", "Blauer Himmel", "Zitrone",
                     "Erdbeere", "Himbeere", "Waldbeere", "Mango", "Maracuja",
-                    "Wasser Melone", "Banane"
+                    "Wasser", "Melone", "Banane"
                 ]
             },
             {
@@ -766,7 +868,10 @@
         let isEditing = false;
         let activeCell = null;
         let activeDropdown = null;
-        let cellData = {};
+        let activeHinweisProductIndex = null;
+        let cellData = {}; // Allergen-Daten
+        let hinweisData = {}; // Hinweis-Texte
+        let editTimeout = null;
         let productIndexMap = {}; // Mapping von Produktnamen zu Index
         
         // ==================== INITIALISIERUNG ====================
@@ -808,16 +913,18 @@
                 document.getElementById('editBtn').classList.add('active');
                 closePinModal();
                 
-                setTimeout(() => {
-                    alert('✅ Bearbeitungsmodus aktiviert für 5 Minuten');
-                }, 100);
-                
-                setTimeout(() => {
+                // Timer für 30 Minuten (1800000 Millisekunden)
+                if (editTimeout) clearTimeout(editTimeout);
+                editTimeout = setTimeout(() => {
                     if (isEditing) {
                         stopEditing();
-                        alert('⏰ Bearbeitungsmodus automatisch deaktiviert');
+                        alert('⏰ Bearbeitungsmodus automatisch deaktiviert nach 30 Minuten');
                     }
-                }, 300000);
+                }, 1800000);
+                
+                setTimeout(() => {
+                    alert('✅ Bearbeitungsmodus aktiviert für 30 Minuten');
+                }, 100);
             } else {
                 document.getElementById('pinError').style.display = 'block';
                 document.getElementById('pinInput').value = '';
@@ -829,7 +936,7 @@
             document.body.classList.remove('editing-enabled');
             document.getElementById('editModeIndicator').style.display = 'none';
             document.getElementById('editBtn').classList.remove('active');
-            
+            if (editTimeout) clearTimeout(editTimeout);
             closeDropdown();
         }
         
@@ -846,6 +953,51 @@
             document.getElementById('dropdownOverlay').classList.remove('show');
         }
         
+        // ==================== HINWEIS MODAL ====================
+        function openHinweisModal(productIndex) {
+            if (!isEditing) return;
+            activeHinweisProductIndex = productIndex;
+            const currentText = hinweisData[productIndex] || '';
+            document.getElementById('hinweisTextarea').value = currentText;
+            document.getElementById('hinweisModal').classList.add('show');
+        }
+        
+        function closeHinweisModal() {
+            document.getElementById('hinweisModal').classList.remove('show');
+            activeHinweisProductIndex = null;
+        }
+        
+        function saveHinweis() {
+            if (activeHinweisProductIndex !== null) {
+                const newText = document.getElementById('hinweisTextarea').value;
+                if (newText && newText.trim() !== '') {
+                    hinweisData[activeHinweisProductIndex] = newText.trim();
+                } else {
+                    delete hinweisData[activeHinweisProductIndex];
+                }
+                updateHinweisCell(activeHinweisProductIndex);
+            }
+            closeHinweisModal();
+        }
+        
+        function updateHinweisCell(productIndex) {
+            const cell = document.querySelector(`td.hinweis-cell[data-product-index="${productIndex}"]`);
+            if (cell) {
+                const text = hinweisData[productIndex] || '';
+                cell.innerHTML = `<div class="hinweis-text">${escapeHtml(text)}</div>`;
+            }
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/\n/g, '<br>');
+        }
+        
         // ==================== TABLELLE BAUEN ====================
         function buildTable() {
             const tbody = document.getElementById('tableBody');
@@ -858,7 +1010,7 @@
                 const categoryRow = document.createElement('tr');
                 categoryRow.className = 'category-row';
                 const categoryCell = document.createElement('td');
-                categoryCell.colSpan = 16;
+                categoryCell.colSpan = 17; // +1 für Hinweis-Spalte
                 categoryCell.textContent = category.name;
                 categoryRow.appendChild(categoryCell);
                 tbody.appendChild(categoryRow);
@@ -897,6 +1049,24 @@
                         row.appendChild(cell);
                     }
                     
+                    // Hinweis-Spalte
+                    const hinweisCell = document.createElement('td');
+                    hinweisCell.className = 'hinweis-cell';
+                    hinweisCell.dataset.productIndex = productIndex;
+                    hinweisCell.style.cursor = 'pointer';
+                    hinweisCell.style.textAlign = 'left';
+                    hinweisCell.style.verticalAlign = 'middle';
+                    hinweisCell.style.maxWidth = '200px';
+                    hinweisCell.style.wordBreak = 'break-word';
+                    hinweisCell.style.whiteSpace = 'normal';
+                    const text = hinweisData[productIndex] || '';
+                    hinweisCell.innerHTML = `<div class="hinweis-text">${escapeHtml(text)}</div>`;
+                    hinweisCell.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openHinweisModal(productIndex);
+                    });
+                    row.appendChild(hinweisCell);
+                    
                     tbody.appendChild(row);
                 });
             });
@@ -923,7 +1093,7 @@
             cell.classList.add('allergen-active');
             activeCell = cell;
             
-            closeDropdown(); // Vorheriges Dropdown schließen
+            closeDropdown();
             
             if (dropdownOptions[column]) {
                 showDropdown(event, cell, productIndex, column, dropdownOptions[column]);
@@ -971,7 +1141,6 @@
             const key = `${productIndex}-${column}`;
             const currentValues = cellData[key] ? cellData[key].split(',').map(v => v.trim()) : [];
             
-            // Overlay anzeigen
             document.getElementById('dropdownOverlay').classList.add('show');
             
             const header = document.createElement('div');
@@ -1085,7 +1254,11 @@
         
         // ==================== DATEN SPEICHERN ====================
         function saveData() {
-            localStorage.setItem('temperaturkontrolle_data', JSON.stringify(cellData));
+            const allData = {
+                allergens: cellData,
+                hinweise: hinweisData
+            };
+            localStorage.setItem('temperaturkontrolle_data', JSON.stringify(allData));
             alert('✅ Daten wurden gespeichert');
         }
         
@@ -1094,8 +1267,11 @@
             const saved = localStorage.getItem('temperaturkontrolle_data');
             if (saved) {
                 try {
-                    cellData = JSON.parse(saved);
+                    const allData = JSON.parse(saved);
+                    cellData = allData.allergens || {};
+                    hinweisData = allData.hinweise || {};
                     
+                    // Allergen-Daten laden
                     Object.keys(cellData).forEach(key => {
                         const [productIndex, column] = key.split('-').map(Number);
                         const value = cellData[key];
@@ -1109,6 +1285,11 @@
                             }
                         }
                     });
+                    
+                    // Hinweis-Daten laden
+                    Object.keys(hinweisData).forEach(productIndex => {
+                        updateHinweisCell(parseInt(productIndex));
+                    });
                 } catch (e) {
                     console.error('Fehler beim Laden der Daten', e);
                 }
@@ -1120,7 +1301,7 @@
             const monthSelector = document.getElementById('monthSelector');
             const [year, month] = monthSelector.value.split('-');
             document.getElementById('pageTitle').textContent = 
-                `Allergene & Zusatzstoffe (${month}.${year})`;
+                `Temperaturkontrolle - Allergene & Zusatzstoffe (${month}.${year})`;
         }
     </script>
 </body>
