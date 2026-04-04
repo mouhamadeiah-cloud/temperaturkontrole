@@ -409,10 +409,10 @@
             <button class="btn btn-primary" onclick="currentMonth()">Aktuell</button>
             <button class="btn btn-success" onclick="saveData()">Speichern</button>
             <button class="btn btn-print" onclick="printCurrentPage()">🖨️ Diese Seite drucken</button>
-       <button class="btn btn-primary" onclick="window.location.href='allergene.html'">
-    📋 Allergene & Zusatzstoffe
-</button>
- </div>
+            <button class="btn btn-primary" onclick="window.location.href='allergene.html'">
+                📋 Allergene & Zusatzstoffe
+            </button>
+        </div>
         
         <div class="content">
             <!-- Temperaturseite -->
@@ -453,6 +453,7 @@
     <script>
         const MINUS = ['-16', '-17', '-18', '-19'];
         const PLUS = ['2', '3', '4', '5'];
+        const LIEFERUNG = ['-16', '-17', '-18', '-19', 'X'];
         const NAMES = ['Mouhamadeiah', 'nejmeh', 'Alo'];
         const WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
         
@@ -479,9 +480,7 @@
         }
         
         function startDailyUpdateCheck() {
-            // التحقق كل دقيقة
             updateInterval = setInterval(checkForDailyUpdate, 60000);
-            // التحقق فوراً
             checkForDailyUpdate();
         }
         
@@ -491,73 +490,79 @@
             const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
             const currentDay = now.getDate();
             
-            // مفتاح آخر تحديث
             const lastUpdateKey = 'lastDailyUpdate';
             const lastUpdate = localStorage.getItem(lastUpdateKey);
-            
-            // التاريخ الحالي
             const todayStr = `${currentYear}-${currentMonth}-${currentDay}`;
             
-            // إذا كان آخر تحديث مختلف عن اليوم، نقوم بالتحديث
             if (lastUpdate !== todayStr) {
                 console.log(`🕐 تحديث: اليوم ${currentDay}.${currentMonth}.${currentYear} أصبح ثابتاً`);
                 
-                // جعل اليوم الحالي ثابتاً
                 finalizeCurrentDay(currentYear, currentMonth, currentDay);
-                
-                // تجهيز اليوم التالي ليكون قابلاً للتعديل
                 prepareNextDay(currentYear, currentMonth, currentDay);
                 
-                // حفظ آخر تحديث
                 localStorage.setItem(lastUpdateKey, todayStr);
-                
-                // حفظ البيانات
                 saveData();
-                
                 showAlert(`✅ ${currentDay}.${currentMonth}.${currentYear} wurde abgeschlossen`, 'success');
             }
         }
         
         function finalizeCurrentDay(year, month, day) {
-            // تحويل اليوم الحالي من selects إلى نصوص ثابتة
-            
             // جدول الحرارة
             const tempRows = document.querySelectorAll('#tempContainer tbody tr');
             for (let row of tempRows) {
                 const dayCell = row.cells[0].textContent;
                 if (dayCell.includes(`${day}.${month}`)) {
-                    
-                    // تحويل جميع ال selects إلى نصوص
-                    for (let i = 1; i <= 9; i++) {
+                    // الأعمدة من 1 إلى 4 (Theke1, Theke2, T.K1, T.K2) -16°C
+                    for (let i = 1; i <= 4; i++) {
                         const cell = row.cells[i];
                         const select = cell.querySelector('select');
                         if (select) {
                             const value = select.value;
                             if (value) {
-                                cell.innerHTML = value + (i <= 5 ? '°C' : '°C');
+                                cell.innerHTML = value + '°C';
                             } else {
-                                // إذا كان فارغاً، نعطي قيمة عشوائية
-                                if (i <= 5) {
-                                    const randomVal = MINUS[Math.floor(Math.random() * MINUS.length)];
-                                    cell.innerHTML = randomVal + '°C';
-                                } else {
-                                    const randomVal = PLUS[Math.floor(Math.random() * PLUS.length)];
-                                    cell.innerHTML = randomVal + '°C';
-                                }
+                                const randomVal = MINUS[Math.floor(Math.random() * MINUS.length)];
+                                cell.innerHTML = randomVal + '°C';
                             }
                         }
                     }
                     
-                    // Kontroler: إضافة اسم عشوائي إذا كان فارغاً
+                    // العمود 5 (Lieferung)
+                    const lieferungCell = row.cells[5];
+                    const lieferungSelect = lieferungCell.querySelector('select');
+                    if (lieferungSelect) {
+                        const value = lieferungSelect.value;
+                        if (value) {
+                            lieferungCell.innerHTML = value;
+                        } else {
+                            const randomVal = LIEFERUNG[Math.floor(Math.random() * LIEFERUNG.length)];
+                            lieferungCell.innerHTML = randomVal;
+                        }
+                    }
+                    
+                    // الأعمدة من 6 إلى 9 (G.K, U.K, Saladette, L.K) 5°C
+                    for (let i = 6; i <= 9; i++) {
+                        const cell = row.cells[i];
+                        const select = cell.querySelector('select');
+                        if (select) {
+                            const value = select.value;
+                            if (value) {
+                                cell.innerHTML = value + '°C';
+                            } else {
+                                const randomVal = PLUS[Math.floor(Math.random() * PLUS.length)];
+                                cell.innerHTML = randomVal + '°C';
+                            }
+                        }
+                    }
+                    
+                    // العمود 10 (Kontroler)
                     const kontrolerCell = row.cells[10];
                     if (!kontrolerCell.textContent) {
                         const randomName = NAMES[Math.floor(Math.random() * NAMES.length)];
                         kontrolerCell.innerHTML = randomName;
                     }
                     
-                    // إزالة كلاس today-row
                     row.classList.remove('today-row');
-                    
                     break;
                 }
             }
@@ -567,34 +572,24 @@
             for (let row of cleanRows) {
                 const dayCell = row.cells[0].textContent;
                 if (dayCell.includes(`${day}.${month}`)) {
-                    
-                    // تحويل الحقول الفارغة إلى x
                     for (let i = 1; i <= 4; i++) {
                         const cell = row.cells[i];
                         if (!cell.textContent) {
                             cell.innerHTML = 'x';
                         }
                     }
-                    
-                    // Kontroler: إضافة اسم عشوائي إذا كان فارغاً
                     const kontrolerCell = row.cells[5];
                     if (!kontrolerCell.textContent) {
                         const randomName = NAMES[Math.floor(Math.random() * NAMES.length)];
                         kontrolerCell.innerHTML = randomName;
                     }
-                    
-                    // إزالة كلاس today-row
                     row.classList.remove('today-row');
-                    
                     break;
                 }
             }
         }
         
         function prepareNextDay(year, month, day) {
-            // تجهيز اليوم التالي (day+1) ليكون قابلاً للتعديل
-            
-            // التحقق من وجود يوم تالي في نفس الشهر
             const daysInMonth = new Date(year, month, 0).getDate();
             const nextDay = day + 1;
             
@@ -604,9 +599,8 @@
                 for (let row of tempRows) {
                     const dayCell = row.cells[0].textContent;
                     if (dayCell.includes(`${nextDay}.${month}`)) {
-                        
-                        // تحويل الخلايا إلى selects فارغة
-                        for (let i = 1; i <= 5; i++) {
+                        // الأعمدة 1-4 (-16°C)
+                        for (let i = 1; i <= 4; i++) {
                             const cell = row.cells[i];
                             const select = document.createElement('select');
                             select.innerHTML = '<option value="">—</option>' + 
@@ -615,6 +609,15 @@
                             cell.appendChild(select);
                         }
                         
+                        // العمود 5 (Lieferung)
+                        const lieferungCell = row.cells[5];
+                        const lieferungSelect = document.createElement('select');
+                        lieferungSelect.innerHTML = '<option value="">—</option>' + 
+                            LIEFERUNG.map(t => `<option value="${t}">${t}</option>`).join('');
+                        lieferungCell.innerHTML = '';
+                        lieferungCell.appendChild(lieferungSelect);
+                        
+                        // الأعمدة 6-9 (5°C)
                         for (let i = 6; i <= 9; i++) {
                             const cell = row.cells[i];
                             const select = document.createElement('select');
@@ -624,12 +627,9 @@
                             cell.appendChild(select);
                         }
                         
-                        // تفريغ Kontroler
+                        // Kontroler
                         row.cells[10].innerHTML = '';
-                        
-                        // إضافة كلاس مميز لليوم القابل للتعديل
                         row.classList.add('next-day-row');
-                        
                         break;
                     }
                 }
@@ -639,18 +639,11 @@
                 for (let row of cleanRows) {
                     const dayCell = row.cells[0].textContent;
                     if (dayCell.includes(`${nextDay}.${month}`)) {
-                        
-                        // تفريغ الحقول
                         for (let i = 1; i <= 4; i++) {
                             row.cells[i].innerHTML = '';
                         }
-                        
-                        // تفريغ Kontroler
                         row.cells[5].innerHTML = '';
-                        
-                        // إضافة كلاس مميز
                         row.classList.add('next-day-row');
-                        
                         break;
                     }
                 }
@@ -677,12 +670,11 @@
             const cm = String(today.getMonth() + 1).padStart(2, '0');
             const cd = today.getDate();
             
-            // التحقق مما إذا كنا بعد 00:01
             const lastUpdate = localStorage.getItem('lastDailyUpdate');
             const todayStr = `${cy}-${cm}-${cd}`;
             const isAfterUpdate = (lastUpdate === todayStr);
             
-            let html = `<table><thead><tr>
+            let html = `<tr><thead><tr>
                 <th>Tag</th>
                 <th>Theke1</th><th>Theke2</th><th>T.K1</th><th>T.K2</th><th>Lieferung</th>
                 <th>G.K</th><th>U.K</th><th>Saladette</th><th>L.K</th><th>Kontroler</th>
@@ -691,7 +683,6 @@
             for (let d = 1; d <= days; d++) {
                 const wd = WEEKDAYS[new Date(year, month-1, d).getDay()];
                 
-                // تحديد حالة اليوم
                 const isPast = (year < cy) || (year == cy && month < cm) || (year == cy && month == cm && d < cd);
                 const isToday = (year == cy && month == cm && d == cd);
                 const isTomorrow = (year == cy && month == cm && d == cd + 1);
@@ -701,34 +692,46 @@
                 if (isFuture) rowClass = 'future-row';
                 if (isToday && !isAfterUpdate) rowClass = 'today-row';
                 if (isTomorrow && isAfterUpdate) rowClass = 'next-day-row';
-                if (isToday && isAfterUpdate) rowClass = ''; // اليوم أصبح ثابتاً
+                if (isToday && isAfterUpdate) rowClass = '';
                 
                 html += `<tr class="${rowClass}">`;
                 html += `<td>${wd} ${d}.${month}</td>`;
                 
                 const dayData = savedData && savedData[d] ? savedData[d] : null;
                 
-                // -16°C Geräte (5)
-                for (let i = 0; i < 5; i++) {
+                // -16°C Geräte (4 Stück: Theke1, Theke2, T.K1, T.K2)
+                for (let i = 0; i < 4; i++) {
                     if (isPast || (isToday && isAfterUpdate)) {
-                        // أيام ماضية أو اليوم بعد التحديث: نصوص ثابتة
                         const savedVal = dayData ? dayData.minus[i] : null;
                         const val = savedVal || MINUS[Math.floor(Math.random() * MINUS.length)];
                         html += `<td>${val}°C</td>`;
                     } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
-                        // اليوم قبل التحديث أو الغد بعد التحديث: selects فارغة
                         const savedVal = dayData ? dayData.minus[i] : '';
                         html += `<td><select>`;
                         html += `<option value="">—</option>`;
                         MINUS.forEach(t => html += `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}°C</option>`);
                         html += `</select></td>`;
                     } else {
-                        // المستقبل: فارغ
                         html += `<td></td>`;
                     }
                 }
                 
-                // 5°C Geräte (4)
+                // Lieferung (5. Spalte) - قيمها -16,-17,-18,-19,X
+                if (isPast || (isToday && isAfterUpdate)) {
+                    const savedVal = dayData ? dayData.lieferung : null;
+                    const val = savedVal || LIEFERUNG[Math.floor(Math.random() * LIEFERUNG.length)];
+                    html += `<td>${val}</td>`;
+                } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
+                    const savedVal = dayData ? dayData.lieferung : '';
+                    html += `<td><select>`;
+                    html += `<option value="">—</option>`;
+                    LIEFERUNG.forEach(t => html += `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}</option>`);
+                    html += `</select></td>`;
+                } else {
+                    html += `<td></td>`;
+                }
+                
+                // 5°C Geräte (4 Stück: G.K, U.K, Saladette, L.K)
                 for (let i = 0; i < 4; i++) {
                     if (isPast || (isToday && isAfterUpdate)) {
                         const savedVal = dayData ? dayData.plus[i] : null;
@@ -775,7 +778,7 @@
             const todayStr = `${cy}-${cm}-${cd}`;
             const isAfterUpdate = (lastUpdate === todayStr);
             
-            let html = `<table><thead><tr>
+            let html = `<td><thead><tr>
                 <th>Tag</th><th>Eisdiele</th><th>Lager</th><th>Toilette</th><th>Geräte</th><th>Kontroler</th>
             </tr></thead><tbody>`;
             
@@ -808,7 +811,6 @@
                     }
                 }
                 
-                // Kontroler
                 if (isPast || (isToday && isAfterUpdate)) {
                     const savedName = dayData ? dayData.kontroler : null;
                     const name = savedName || NAMES[Math.floor(Math.random() * NAMES.length)];
@@ -853,9 +855,7 @@
                 document.body.classList.add('printing-clean');
                 document.body.classList.remove('printing-temp');
             }
-            
             window.print();
-            
             setTimeout(() => {
                 document.body.classList.remove('printing-temp', 'printing-clean');
             }, 100);
@@ -891,11 +891,13 @@
                 
                 tempData[day] = {
                     minus: [],
+                    lieferung: '',
                     plus: [],
                     kontroler: ''
                 };
                 
-                for (let i = 1; i <= 5; i++) {
+                // أعمدة -16°C (4 أعمدة: Theke1, Theke2, T.K1, T.K2)
+                for (let i = 1; i <= 4; i++) {
                     const cell = row.cells[i];
                     const select = cell.querySelector('select');
                     if (select) {
@@ -906,6 +908,16 @@
                     }
                 }
                 
+                // عمود Lieferung (العمود 5)
+                const lieferungCell = row.cells[5];
+                const lieferungSelect = lieferungCell.querySelector('select');
+                if (lieferungSelect) {
+                    tempData[day].lieferung = lieferungSelect.value || '';
+                } else {
+                    tempData[day].lieferung = lieferungCell.textContent;
+                }
+                
+                // أعمدة 5°C (4 أعمدة: G.K, U.K, Saladette, L.K)
                 for (let i = 6; i <= 9; i++) {
                     const cell = row.cells[i];
                     const select = cell.querySelector('select');
@@ -917,6 +929,7 @@
                     }
                 }
                 
+                // Kontroler (العمود 10)
                 tempData[day].kontroler = row.cells[10].textContent;
             });
             
@@ -952,22 +965,10 @@
             alert.textContent = message;
             alert.style.backgroundColor = type === 'success' ? '#27ae60' : '#e74c3c';
             alert.style.display = 'block';
-            
             setTimeout(() => {
                 alert.style.display = 'none';
             }, 3000);
         }
-
     </script>
-<!-- Im head Bereich -->
-<link rel="manifest" href="manifest.json">
-<script src="app.js"></script>
-
-<!-- Für Service Worker Registrierung (optional) -->
-<script>
-if ('serviceWorker' in naviger) {
-    navigator.serviceWorker.register('sw.js');
-}
-</script>
 </body>
 </html>
