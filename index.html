@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Primel Eiscafé</title>
     <style>
-        /* نفس التنسيقات السابقة */
         * {
             margin: 0;
             padding: 0;
@@ -28,14 +27,12 @@
                 size: A4 landscape;
                 margin: 0.8cm;
             }
-            
             body {
                 padding: 0;
                 background: white;
                 overflow: visible;
                 height: auto;
             }
-            
             .container {
                 max-width: 100%;
                 height: auto;
@@ -43,38 +40,31 @@
                 border-radius: 0;
                 overflow: visible;
             }
-            
             .no-print {
                 display: none !important;
             }
-            
             .content {
                 overflow: visible;
                 height: auto;
             }
-            
             .page {
                 overflow: visible;
                 height: auto;
             }
-            
             body.printing-temp #cleanPage,
             body.printing-clean #tempPage,
             body.printing-temp .abbreviations-line.clean-only,
             body.printing-clean .abbreviations-line.temp-only {
                 display: none !important;
             }
-            
             body.printing-temp #tempPage,
             body.printing-clean #cleanPage {
                 display: block !important;
             }
-            
             .table-container {
                 overflow: visible;
                 height: auto;
             }
-            
             table {
                 page-break-after: auto;
                 border: 1px solid #000;
@@ -83,21 +73,17 @@
                 width: 100%;
                 border-collapse: collapse;
             }
-            
             tr {
                 page-break-inside: avoid;
                 page-break-after: auto;
                 height: 0.6cm;
             }
-            
             thead {
                 display: table-header-group;
             }
-            
             tbody {
                 display: table-row-group;
             }
-            
             th {
                 background: #34495e !important;
                 color: white !important;
@@ -107,7 +93,6 @@
                 font-size: 8pt;
                 height: 0.8cm;
             }
-            
             td {
                 border: 1px solid #000 !important;
                 padding: 3px 2px;
@@ -115,7 +100,6 @@
                 height: 0.6cm;
                 color: black !important;
             }
-            
             select {
                 border: none;
                 background: transparent;
@@ -126,7 +110,6 @@
                 padding: 0;
                 color: black !important;
             }
-            
             .abbreviations-line {
                 display: block !important;
                 margin-top: 10px;
@@ -135,12 +118,10 @@
                 padding: 4px;
                 color: black;
             }
-            
             .page-header {
                 padding: 4px 8px;
                 margin-bottom: 5px;
             }
-            
             .page-header h2 {
                 font-size: 12pt;
                 color: black;
@@ -314,10 +295,6 @@
             color: black;
         }
         
-        .x-field {
-            font-weight: bold;
-        }
-        
         .future-row {
             background: #f5f5f5;
             color: #999;
@@ -409,13 +386,10 @@
             <button class="btn btn-primary" onclick="currentMonth()">Aktuell</button>
             <button class="btn btn-success" onclick="saveData()">Speichern</button>
             <button class="btn btn-print" onclick="printCurrentPage()">🖨️ Diese Seite drucken</button>
-            <button class="btn btn-primary" onclick="window.location.href='allergene.html'">
-                📋 Allergene & Zusatzstoffe
-            </button>
+            <button class="btn btn-primary" onclick="window.location.href='allergene.html'">📋 Allergene & Zusatzstoffe</button>
         </div>
         
         <div class="content">
-            <!-- Temperaturseite -->
             <div id="tempPage" class="page">
                 <div class="page-header">
                     <h2 id="tempHeader">Die Primel Eiscafé Temperaturkontrolle für 03.2026</h2>
@@ -423,7 +397,6 @@
                 <div class="table-container" id="tempContainer"></div>
             </div>
             
-            <!-- Reinigungsseite -->
             <div id="cleanPage" class="page" style="display: none;">
                 <div class="page-header">
                     <h2 id="cleanHeader">Die Primel Eiscafé Reinigungsplan für 03.2026</h2>
@@ -432,7 +405,6 @@
             </div>
         </div>
         
-        <!-- الاختصارات - للحرارة فقط -->
         <div class="abbreviations-line temp-only">
             <span><span class="abbr">T.K 1</span> = Tiefkühlschrank 1</span>
             <span><span class="abbr">T.K 2</span> = Tiefkühlschrank 2</span>
@@ -441,9 +413,7 @@
             <span><span class="abbr">L.K</span> = Lager Kühlschrank</span>
         </div>
         
-        <div class="abbreviations-line clean-only">
-            <!-- فارغة -->
-        </div>
+        <div class="abbreviations-line clean-only"></div>
         
         <div class="app-footer no-print">
             <p>© 2026 Primel Eiscafé</p>
@@ -496,10 +466,8 @@
             
             if (lastUpdate !== todayStr) {
                 console.log(`🕐 تحديث: اليوم ${currentDay}.${currentMonth}.${currentYear} أصبح ثابتاً`);
-                
                 finalizeCurrentDay(currentYear, currentMonth, currentDay);
                 prepareNextDay(currentYear, currentMonth, currentDay);
-                
                 localStorage.setItem(lastUpdateKey, todayStr);
                 saveData();
                 showAlert(`✅ ${currentDay}.${currentMonth}.${currentYear} wurde abgeschlossen`, 'success');
@@ -507,81 +475,55 @@
         }
         
         function finalizeCurrentDay(year, month, day) {
-            // جدول الحرارة
             const tempRows = document.querySelectorAll('#tempContainer tbody tr');
             for (let row of tempRows) {
                 const dayCell = row.cells[0].textContent;
                 if (dayCell.includes(`${day}.${month}`)) {
-                    // الأعمدة من 1 إلى 4 (Theke1, Theke2, T.K1, T.K2) -16°C
+                    // Theke1, Theke2, T.K1, T.K2 (أعمدة 1-4)
                     for (let i = 1; i <= 4; i++) {
                         const cell = row.cells[i];
                         const select = cell.querySelector('select');
                         if (select) {
                             const value = select.value;
-                            if (value) {
-                                cell.innerHTML = value + '°C';
-                            } else {
-                                const randomVal = MINUS[Math.floor(Math.random() * MINUS.length)];
-                                cell.innerHTML = randomVal + '°C';
-                            }
+                            cell.innerHTML = (value ? value + '°C' : MINUS[Math.floor(Math.random() * MINUS.length)] + '°C');
                         }
                     }
-                    
-                    // العمود 5 (Lieferung)
+                    // Lieferung (عمود 5)
                     const lieferungCell = row.cells[5];
                     const lieferungSelect = lieferungCell.querySelector('select');
                     if (lieferungSelect) {
                         const value = lieferungSelect.value;
-                        if (value) {
-                            lieferungCell.innerHTML = value;
-                        } else {
-                            const randomVal = LIEFERUNG[Math.floor(Math.random() * LIEFERUNG.length)];
-                            lieferungCell.innerHTML = randomVal;
-                        }
+                        lieferungCell.innerHTML = value || LIEFERUNG[Math.floor(Math.random() * LIEFERUNG.length)];
                     }
-                    
-                    // الأعمدة من 6 إلى 9 (G.K, U.K, Saladette, L.K) 5°C
+                    // G.K, U.K, Saladette, L.K (أعمدة 6-9)
                     for (let i = 6; i <= 9; i++) {
                         const cell = row.cells[i];
                         const select = cell.querySelector('select');
                         if (select) {
                             const value = select.value;
-                            if (value) {
-                                cell.innerHTML = value + '°C';
-                            } else {
-                                const randomVal = PLUS[Math.floor(Math.random() * PLUS.length)];
-                                cell.innerHTML = randomVal + '°C';
-                            }
+                            cell.innerHTML = (value ? value + '°C' : PLUS[Math.floor(Math.random() * PLUS.length)] + '°C');
                         }
                     }
-                    
-                    // العمود 10 (Kontroler)
+                    // Kontroler (عمود 10)
                     const kontrolerCell = row.cells[10];
                     if (!kontrolerCell.textContent) {
-                        const randomName = NAMES[Math.floor(Math.random() * NAMES.length)];
-                        kontrolerCell.innerHTML = randomName;
+                        kontrolerCell.innerHTML = NAMES[Math.floor(Math.random() * NAMES.length)];
                     }
-                    
                     row.classList.remove('today-row');
                     break;
                 }
             }
             
-            // جدول التنظيف
             const cleanRows = document.querySelectorAll('#cleanContainer tbody tr');
             for (let row of cleanRows) {
                 const dayCell = row.cells[0].textContent;
                 if (dayCell.includes(`${day}.${month}`)) {
                     for (let i = 1; i <= 4; i++) {
-                        const cell = row.cells[i];
-                        if (!cell.textContent) {
-                            cell.innerHTML = 'x';
-                        }
+                        if (!row.cells[i].textContent) row.cells[i].innerHTML = 'x';
                     }
                     const kontrolerCell = row.cells[5];
                     if (!kontrolerCell.textContent) {
-                        const randomName = NAMES[Math.floor(Math.random() * NAMES.length)];
-                        kontrolerCell.innerHTML = randomName;
+                        kontrolerCell.innerHTML = NAMES[Math.floor(Math.random() * NAMES.length)];
                     }
                     row.classList.remove('today-row');
                     break;
@@ -592,60 +534,42 @@
         function prepareNextDay(year, month, day) {
             const daysInMonth = new Date(year, month, 0).getDate();
             const nextDay = day + 1;
+            if (nextDay > daysInMonth) return;
             
-            if (nextDay <= daysInMonth) {
-                // جدول الحرارة
-                const tempRows = document.querySelectorAll('#tempContainer tbody tr');
-                for (let row of tempRows) {
-                    const dayCell = row.cells[0].textContent;
-                    if (dayCell.includes(`${nextDay}.${month}`)) {
-                        // الأعمدة 1-4 (-16°C)
-                        for (let i = 1; i <= 4; i++) {
-                            const cell = row.cells[i];
-                            const select = document.createElement('select');
-                            select.innerHTML = '<option value="">—</option>' + 
-                                MINUS.map(t => `<option value="${t}">${t}°C</option>`).join('');
-                            cell.innerHTML = '';
-                            cell.appendChild(select);
-                        }
-                        
-                        // العمود 5 (Lieferung)
-                        const lieferungCell = row.cells[5];
-                        const lieferungSelect = document.createElement('select');
-                        lieferungSelect.innerHTML = '<option value="">—</option>' + 
-                            LIEFERUNG.map(t => `<option value="${t}">${t}</option>`).join('');
-                        lieferungCell.innerHTML = '';
-                        lieferungCell.appendChild(lieferungSelect);
-                        
-                        // الأعمدة 6-9 (5°C)
-                        for (let i = 6; i <= 9; i++) {
-                            const cell = row.cells[i];
-                            const select = document.createElement('select');
-                            select.innerHTML = '<option value="">—</option>' + 
-                                PLUS.map(t => `<option value="${t}">${t}°C</option>`).join('');
-                            cell.innerHTML = '';
-                            cell.appendChild(select);
-                        }
-                        
-                        // Kontroler
-                        row.cells[10].innerHTML = '';
-                        row.classList.add('next-day-row');
-                        break;
+            const tempRows = document.querySelectorAll('#tempContainer tbody tr');
+            for (let row of tempRows) {
+                const dayCell = row.cells[0].textContent;
+                if (dayCell.includes(`${nextDay}.${month}`)) {
+                    for (let i = 1; i <= 4; i++) {
+                        const select = document.createElement('select');
+                        select.innerHTML = '<option value="">—</option>' + MINUS.map(t => `<option value="${t}">${t}°C</option>`).join('');
+                        row.cells[i].innerHTML = '';
+                        row.cells[i].appendChild(select);
                     }
+                    const lieferungSelect = document.createElement('select');
+                    lieferungSelect.innerHTML = '<option value="">—</option>' + LIEFERUNG.map(t => `<option value="${t}">${t}</option>`).join('');
+                    row.cells[5].innerHTML = '';
+                    row.cells[5].appendChild(lieferungSelect);
+                    for (let i = 6; i <= 9; i++) {
+                        const select = document.createElement('select');
+                        select.innerHTML = '<option value="">—</option>' + PLUS.map(t => `<option value="${t}">${t}°C</option>`).join('');
+                        row.cells[i].innerHTML = '';
+                        row.cells[i].appendChild(select);
+                    }
+                    row.cells[10].innerHTML = '';
+                    row.classList.add('next-day-row');
+                    break;
                 }
-                
-                // جدول التنظيف
-                const cleanRows = document.querySelectorAll('#cleanContainer tbody tr');
-                for (let row of cleanRows) {
-                    const dayCell = row.cells[0].textContent;
-                    if (dayCell.includes(`${nextDay}.${month}`)) {
-                        for (let i = 1; i <= 4; i++) {
-                            row.cells[i].innerHTML = '';
-                        }
-                        row.cells[5].innerHTML = '';
-                        row.classList.add('next-day-row');
-                        break;
-                    }
+            }
+            
+            const cleanRows = document.querySelectorAll('#cleanContainer tbody tr');
+            for (let row of cleanRows) {
+                const dayCell = row.cells[0].textContent;
+                if (dayCell.includes(`${nextDay}.${month}`)) {
+                    for (let i = 1; i <= 4; i++) row.cells[i].innerHTML = '';
+                    row.cells[5].innerHTML = '';
+                    row.classList.add('next-day-row');
+                    break;
                 }
             }
         }
@@ -653,7 +577,6 @@
         function loadMonth(year, month) {
             const savedTempData = loadSavedData('temp', year, month);
             const savedCleanData = loadSavedData('clean', year, month);
-            
             buildTempTable(year, month, savedTempData);
             buildCleanTable(year, month, savedCleanData);
         }
@@ -674,15 +597,13 @@
             const todayStr = `${cy}-${cm}-${cd}`;
             const isAfterUpdate = (lastUpdate === todayStr);
             
-            let html = `<tr><thead><tr>
-                <th>Tag</th>
-                <th>Theke1</th><th>Theke2</th><th>T.K1</th><th>T.K2</th><th>Lieferung</th>
+            let html = `<table><thead><tr>
+                <th>Tag</th><th>Theke1</th><th>Theke2</th><th>T.K1</th><th>T.K2</th><th>Lieferung</th>
                 <th>G.K</th><th>U.K</th><th>Saladette</th><th>L.K</th><th>Kontroler</th>
             </tr></thead><tbody>`;
             
             for (let d = 1; d <= days; d++) {
                 const wd = WEEKDAYS[new Date(year, month-1, d).getDay()];
-                
                 const isPast = (year < cy) || (year == cy && month < cm) || (year == cy && month == cm && d < cd);
                 const isToday = (year == cy && month == cm && d == cd);
                 const isTomorrow = (year == cy && month == cm && d == cd + 1);
@@ -692,11 +613,8 @@
                 if (isFuture) rowClass = 'future-row';
                 if (isToday && !isAfterUpdate) rowClass = 'today-row';
                 if (isTomorrow && isAfterUpdate) rowClass = 'next-day-row';
-                if (isToday && isAfterUpdate) rowClass = '';
                 
-                html += `<tr class="${rowClass}">`;
-                html += `<td>${wd} ${d}.${month}</td>`;
-                
+                html += `<tr class="${rowClass}"><td>${wd} ${d}.${month}</td>`;
                 const dayData = savedData && savedData[d] ? savedData[d] : null;
                 
                 // -16°C Geräte (4 Stück: Theke1, Theke2, T.K1, T.K2)
@@ -707,26 +625,20 @@
                         html += `<td>${val}°C</td>`;
                     } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
                         const savedVal = dayData ? dayData.minus[i] : '';
-                        html += `<td><select>`;
-                        html += `<option value="">—</option>`;
-                        MINUS.forEach(t => html += `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}°C</option>`);
-                        html += `</select></td>`;
+                        html += `<td><select><option value="">—</option>${MINUS.map(t => `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}°C</option>`).join('')}</select></td>`;
                     } else {
                         html += `<td></td>`;
                     }
                 }
                 
-                // Lieferung (5. Spalte) - قيمها -16,-17,-18,-19,X
+                // Lieferung
                 if (isPast || (isToday && isAfterUpdate)) {
                     const savedVal = dayData ? dayData.lieferung : null;
                     const val = savedVal || LIEFERUNG[Math.floor(Math.random() * LIEFERUNG.length)];
                     html += `<td>${val}</td>`;
                 } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
                     const savedVal = dayData ? dayData.lieferung : '';
-                    html += `<td><select>`;
-                    html += `<option value="">—</option>`;
-                    LIEFERUNG.forEach(t => html += `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}</option>`);
-                    html += `</select></td>`;
+                    html += `<td><select><option value="">—</option>${LIEFERUNG.map(t => `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}</option>`).join('')}</select></td>`;
                 } else {
                     html += `<td></td>`;
                 }
@@ -739,10 +651,7 @@
                         html += `<td>${val}°C</td>`;
                     } else if ((isToday && !isAfterUpdate) || (isTomorrow && isAfterUpdate)) {
                         const savedVal = dayData ? dayData.plus[i] : '';
-                        html += `<td><select>`;
-                        html += `<option value="">—</option>`;
-                        PLUS.forEach(t => html += `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}°C</option>`);
-                        html += `</select></td>`;
+                        html += `<td><select><option value="">—</option>${PLUS.map(t => `<option value="${t}" ${t === savedVal ? 'selected' : ''}>${t}°C</option>`).join('')}</select></td>`;
                     } else {
                         html += `<td></td>`;
                     }
@@ -778,13 +687,12 @@
             const todayStr = `${cy}-${cm}-${cd}`;
             const isAfterUpdate = (lastUpdate === todayStr);
             
-            let html = `<td><thead><tr>
+            let html = `<table><thead><tr>
                 <th>Tag</th><th>Eisdiele</th><th>Lager</th><th>Toilette</th><th>Geräte</th><th>Kontroler</th>
             </tr></thead><tbody>`;
             
             for (let d = 1; d <= days; d++) {
                 const wd = WEEKDAYS[new Date(year, month-1, d).getDay()];
-                
                 const isPast = (year < cy) || (year == cy && month < cm) || (year == cy && month == cm && d < cd);
                 const isToday = (year == cy && month == cm && d == cd);
                 const isTomorrow = (year == cy && month == cm && d == cd + 1);
@@ -795,9 +703,7 @@
                 if (isToday && !isAfterUpdate) rowClass = 'today-row';
                 if (isTomorrow && isAfterUpdate) rowClass = 'next-day-row';
                 
-                html += `<tr class="${rowClass}">`;
-                html += `<td>${wd} ${d}.${month}</td>`;
-                
+                html += `<tr class="${rowClass}"><td>${wd} ${d}.${month}</td>`;
                 const dayData = savedData && savedData[d] ? savedData[d] : null;
                 
                 for (let i = 0; i < 4; i++) {
@@ -833,7 +739,6 @@
             currentPage = page;
             document.getElementById('tempPage').style.display = page === 'temp' ? 'flex' : 'none';
             document.getElementById('cleanPage').style.display = page === 'clean' ? 'flex' : 'none';
-            
             if (page === 'temp') {
                 document.querySelector('.abbreviations-line.temp-only').style.display = 'block';
                 document.querySelector('.abbreviations-line.clean-only').style.display = 'none';
@@ -841,7 +746,6 @@
                 document.querySelector('.abbreviations-line.temp-only').style.display = 'none';
                 document.querySelector('.abbreviations-line.clean-only').style.display = 'block';
             }
-            
             document.querySelectorAll('.nav-btn').forEach((b, i) => {
                 b.classList.toggle('active', (i === 0 && page === 'temp') || (i === 1 && page === 'clean'));
             });
@@ -870,93 +774,50 @@
             const t = new Date();
             const y = t.getFullYear();
             const m = String(t.getMonth() + 1).padStart(2, '0');
-            
             if (y < 2026 || (y === 2026 && m < '02')) {
                 showAlert('Keine Daten vor 01.02.2026', 'error');
                 return;
             }
-            
             document.getElementById('monthSelector').value = `${y}-${m}`;
             loadMonth(y.toString(), m);
         }
         
         function saveData() {
-            // حفظ بيانات الحرارة
             const tempData = {};
             const tempRows = document.querySelectorAll('#tempContainer tbody tr');
-            
             tempRows.forEach(row => {
                 const dayCell = row.cells[0].textContent;
                 const day = dayCell.split(' ')[1].split('.')[0];
-                
-                tempData[day] = {
-                    minus: [],
-                    lieferung: '',
-                    plus: [],
-                    kontroler: ''
-                };
-                
-                // أعمدة -16°C (4 أعمدة: Theke1, Theke2, T.K1, T.K2)
+                tempData[day] = { minus: [], lieferung: '', plus: [], kontroler: '' };
                 for (let i = 1; i <= 4; i++) {
                     const cell = row.cells[i];
                     const select = cell.querySelector('select');
-                    if (select) {
-                        tempData[day].minus.push(select.value || '');
-                    } else {
-                        const val = cell.textContent.replace('°C', '');
-                        tempData[day].minus.push(val);
-                    }
+                    tempData[day].minus.push(select ? select.value : cell.textContent.replace('°C', ''));
                 }
-                
-                // عمود Lieferung (العمود 5)
                 const lieferungCell = row.cells[5];
                 const lieferungSelect = lieferungCell.querySelector('select');
-                if (lieferungSelect) {
-                    tempData[day].lieferung = lieferungSelect.value || '';
-                } else {
-                    tempData[day].lieferung = lieferungCell.textContent;
-                }
-                
-                // أعمدة 5°C (4 أعمدة: G.K, U.K, Saladette, L.K)
+                tempData[day].lieferung = lieferungSelect ? lieferungSelect.value : lieferungCell.textContent;
                 for (let i = 6; i <= 9; i++) {
                     const cell = row.cells[i];
                     const select = cell.querySelector('select');
-                    if (select) {
-                        tempData[day].plus.push(select.value || '');
-                    } else {
-                        const val = cell.textContent.replace('°C', '');
-                        tempData[day].plus.push(val);
-                    }
+                    tempData[day].plus.push(select ? select.value : cell.textContent.replace('°C', ''));
                 }
-                
-                // Kontroler (العمود 10)
                 tempData[day].kontroler = row.cells[10].textContent;
             });
             
-            // حفظ بيانات التنظيف
             const cleanData = {};
             const cleanRows = document.querySelectorAll('#cleanContainer tbody tr');
-            
             cleanRows.forEach(row => {
                 const dayCell = row.cells[0].textContent;
                 const day = dayCell.split(' ')[1].split('.')[0];
-                
-                cleanData[day] = {
-                    fields: [],
-                    kontroler: ''
-                };
-                
-                for (let i = 1; i <= 4; i++) {
-                    cleanData[day].fields.push(row.cells[i].textContent);
-                }
-                
+                cleanData[day] = { fields: [], kontroler: '' };
+                for (let i = 1; i <= 4; i++) cleanData[day].fields.push(row.cells[i].textContent);
                 cleanData[day].kontroler = row.cells[5].textContent;
             });
             
             const [y, m] = document.getElementById('monthSelector').value.split('-');
             localStorage.setItem(`temp_${y}_${m}`, JSON.stringify(tempData));
             localStorage.setItem(`clean_${y}_${m}`, JSON.stringify(cleanData));
-            
             showAlert('✅ Daten gespeichert', 'success');
         }
         
@@ -965,9 +826,7 @@
             alert.textContent = message;
             alert.style.backgroundColor = type === 'success' ? '#27ae60' : '#e74c3c';
             alert.style.display = 'block';
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 3000);
+            setTimeout(() => alert.style.display = 'none', 3000);
         }
     </script>
 </body>
