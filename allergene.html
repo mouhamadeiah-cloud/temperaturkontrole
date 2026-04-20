@@ -804,18 +804,15 @@
 
     <script>
         // ==================== FIREBASE KONFIGURATION ====================
-        // 🔴🔴🔴 ضع رابط Firebase API هنا (استبدل هذا الكائن بكائن التهيئة الخاص بك) 🔴🔴🔴
+        // 🔴🔴🔴 ضع رابط Firebase API هنا 🔴🔴🔴
         const firebaseConfig = {
-            // 🔴 انسخ والصق كائن firebaseConfig الخاص بك هنا 🔴
-            // مثال:
-            //  apiKey: "AIzaSyAf6htsYjMk2vgKg6ZWI7Wkl-e2_3f9oqs",
-  authDomain: "kellnerorder.firebaseapp.com",
-  databaseURL: "https://kellnerorder-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "kellnerorder",
-  storageBucket: "kellnerorder.firebasestorage.app",
-  messagingSenderId: "670485088629",
-  appId: "1:670485088629:web:6a34454d057e3e050b2b3c",
-  measurementId: "G-FZFN6G8FYM"
+            apiKey: "AIzaSyAf6htsYjMk2vgKg6ZWI7Wkl-e2_3f9oqs",
+            authDomain: "kellnerorder.firebaseapp.com",
+            projectId: "kellnerorder",
+            storageBucket: "kellnerorder.firebasestorage.app",
+            messagingSenderId: "670485088629",
+            appId: "1:670485088629:web:6a34454d057e3e050b2b3c",
+            measurementId: "G-FZFN6G8FYM"
         };
         // 🔴🔴🔴 انتهى مكان رابط Firebase 🔴🔴🔴
 
@@ -1267,7 +1264,7 @@
         
         // ==================== ZELLWERT AKTUALISIEREN ====================
         function updateCellValue(productIndex, column, value) {
-            const contentDiv = document.getElementById(`cell-${productIndex}-${column}`);
+            const contentDiv = document.getElementById(`cell-${productIndex}-${col}`);
             if (!contentDiv) return;
             
             contentDiv.innerHTML = '';
