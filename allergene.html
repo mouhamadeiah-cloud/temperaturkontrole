@@ -4,665 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Primel Eiscafé - Temperaturkontrolle</title>
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (Realtime Database) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            background: #f0f2f5;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 10px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            height: 100%;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        /* Header */
-        .app-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-        
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #3498db;
-            font-weight: bold;
-            font-size: 1.4em;
-        }
-        
-        .edit-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 0.9em;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .edit-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .edit-btn.active {
-            background: #27ae60;
-        }
-        
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 0.9em;
-            font-weight: 600;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-        
-        /* PIN Modal */
-        .pin-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 20000;
-        }
-        
-        .pin-modal.show {
-            display: flex;
-        }
-        
-        .pin-box {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 350px;
-            width: 90%;
-        }
-        
-        .pin-box h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-        }
-        
-        .pin-box input {
-            width: 100%;
-            padding: 12px;
-            font-size: 1.2em;
-            text-align: center;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            letter-spacing: 8px;
-            font-weight: bold;
-        }
-        
-        .pin-box input:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-        
-        .pin-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .pin-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .pin-btn.primary {
-            background: #3498db;
-            color: white;
-        }
-        
-        .pin-btn.primary:hover {
-            background: #2980b9;
-        }
-        
-        .pin-btn.secondary {
-            background: #95a5a6;
-            color: white;
-        }
-        
-        .pin-btn.secondary:hover {
-            background: #7f8c8d;
-        }
-        
-        .pin-error {
-            color: #e74c3c;
-            margin-top: 10px;
-            font-size: 0.9em;
-            display: none;
-        }
-        
-        /* Toolbar */
-        .toolbar {
-            padding: 10px 15px;
-            background: #ecf0f1;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            border-bottom: 1px solid #bdc3c7;
-            flex-shrink: 0;
-            flex-wrap: wrap;
-        }
-        
-        .month-selector {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .month-selector input {
-            padding: 6px 10px;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-        }
-        
-        .btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.9em;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
+        /* كل الـ style كما هو دون تغيير */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; background: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; }
+        .container { max-width: 1400px; height: 100%; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; }
+        .app-header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 1.2em; font-weight: 600; }
+        .logo-icon { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #3498db; font-weight: bold; font-size: 1.4em; }
+        .edit-btn { background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 0.9em; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.3s ease; }
+        .edit-btn:hover { background: rgba(255,255,255,0.3); }
+        .edit-btn.active { background: #27ae60; }
+        .back-btn { background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 0.9em; font-weight: 600; cursor: pointer; margin-left: 10px; }
+        .pin-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 20000; }
+        .pin-modal.show { display: flex; }
+        .pin-box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); text-align: center; max-width: 350px; width: 90%; }
+        .pin-box h3 { color: #2c3e50; margin-bottom: 20px; font-size: 1.3em; }
+        .pin-box input { width: 100%; padding: 12px; font-size: 1.2em; text-align: center; border: 2px solid #bdc3c7; border-radius: 6px; margin-bottom: 20px; letter-spacing: 8px; font-weight: bold; }
+        .pin-box input:focus { outline: none; border-color: #3498db; }
+        .pin-buttons { display: flex; gap: 10px; }
+        .pin-btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 1em; font-weight: 600; cursor: pointer; }
+        .pin-btn.primary { background: #3498db; color: white; }
+        .pin-btn.primary:hover { background: #2980b9; }
+        .pin-btn.secondary { background: #95a5a6; color: white; }
+        .pin-btn.secondary:hover { background: #7f8c8d; }
+        .pin-error { color: #e74c3c; margin-top: 10px; font-size: 0.9em; display: none; }
+        .toolbar { padding: 10px 15px; background: #ecf0f1; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #bdc3c7; flex-shrink: 0; flex-wrap: wrap; }
+        .month-selector { display: flex; align-items: center; gap: 8px; }
+        .month-selector input { padding: 6px 10px; border: 1px solid #bdc3c7; border-radius: 4px; }
+        .btn { padding: 6px 12px; border: none; border-radius: 4px; font-size: 0.9em; font-weight: 600; cursor: pointer; }
         .btn-primary { background: #3498db; color: white; }
         .btn-success { background: #27ae60; color: white; }
         .btn-print { background: #95a5a6; color: white; }
-        
-        /* Page Header */
-        .page-header {
-            padding: 8px 15px;
-            background: #f8f9fa;
-            border-bottom: 2px solid #3498db;
-            flex-shrink: 0;
-        }
-        
-        .page-header h2 {
-            font-size: 1.1em;
-            color: #2c3e50;
-        }
-        
-        .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-height: 0;
-        }
-        
-        .page {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-height: 0;
-        }
-        
-        /* Table Container */
-        .table-container {
-            flex: 1;
-            overflow: auto;
-            background: white;
-            min-height: 0;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1px solid #34495e;
-            font-size: 0.8em;
-            table-layout: fixed;
-            min-width: 1300px;
-        }
-        
-        th {
-            background: #34495e;
-            color: white;
-            font-weight: 600;
-            text-align: center;
-            border: 1px solid #2c3e50;
-            padding: 6px 2px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            font-size: 0.75em;
-        }
-        
-        td {
-            padding: 4px 2px;
-            border: 1px solid #bdc3c7;
-            text-align: center;
-            vertical-align: middle;
-            cursor: default;
-            transition: background-color 0.2s;
-            height: 32px;
-        }
-        
-        td.allergen-active {
-            background-color: #ffebee;
-            border: 2px solid #e74c3c;
-        }
-        
-        td.allergen-selected {
-            background-color: #ffcdd2;
-        }
-        
-        tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-        
-        /* Kategorie-Zeilen */
-        tr.category-row {
-            background: #3498db;
-            color: white;
-            font-weight: bold;
-        }
-        
-        tr.category-row td {
-            background: #3498db;
-            color: white;
-            border: 1px solid #2980b9;
-            padding: 8px 5px;
-            font-size: 0.9em;
-            text-align: left;
-            padding-left: 15px;
-        }
-        
-        .cell-content {
-            min-height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 2px;
-        }
-        
-        .value-tag {
-            background: #e3f2fd;
-            padding: 2px 4px;
-            border-radius: 10px;
-            font-size: 0.7em;
-            font-weight: 600;
-            color: #1976d2;
-            display: inline-block;
-            cursor: default;
-        }
-        
-        /* Hinweis-Spalte */
-        .hinweis-cell {
-            cursor: pointer;
-            text-align: left;
-            vertical-align: middle;
-        }
-        
-        .hinweis-text {
-            font-size: 0.75em;
-            color: #2c3e50;
-            line-height: 1.3;
-            word-break: break-word;
-            white-space: normal;
-            display: inline-block;
-            width: 100%;
-            text-align: left;
-            padding: 0 4px;
-        }
-        
-        /* Dropdown - zentriert */
-        .custom-dropdown {
-            position: fixed;
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-            max-height: 350px;
-            overflow-y: auto;
-            z-index: 10000;
-            min-width: 260px;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            max-width: 90vw;
-        }
-        
-        @media (max-width: 768px) {
-            .custom-dropdown {
-                width: 90%;
-                left: 5%;
-                transform: translateY(10px);
-                top: auto;
-                bottom: 10px;
-            }
-        }
-        
-        .dropdown-header {
-            padding: 12px 15px;
-            background: #f5f5f5;
-            border-bottom: 1px solid #ddd;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 5;
-            border-radius: 8px 8px 0 0;
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.2em;
-            cursor: pointer;
-            color: #666;
-            padding: 0 8px;
-        }
-        
-        .close-btn:hover {
-            color: #000;
-        }
-        
-        .dropdown-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.9em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .dropdown-item:hover {
-            background-color: #e3f2fd;
-        }
-        
-        .dropdown-item.selected {
-            background-color: #bbdefb;
-        }
-        
-        .dropdown-item input[type="checkbox"] {
-            margin: 0;
-            cursor: pointer;
-            pointer-events: none;
-            width: 18px;
-            height: 18px;
-        }
-        
-        .dropdown-footer {
-            padding: 12px 15px;
-            background: #f5f5f5;
-            border-top: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            position: sticky;
-            bottom: 0;
-            z-index: 5;
-            border-radius: 0 0 8px 8px;
-        }
-        
-        .dropdown-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-        }
-        
-        .dropdown-btn.clear {
-            background: #f44336;
-            color: white;
-        }
-        
-        .dropdown-btn.clear:hover {
-            background: #d32f2f;
-        }
-        
-        .dropdown-btn.close {
-            background: #4caf50;
-            color: white;
-        }
-        
-        .dropdown-btn.close:hover {
-            background: #45a049;
-        }
-        
-        /* Hinweis-Editor Modal */
-        .hinweis-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 20000;
-        }
-        
-        .hinweis-modal.show {
-            display: flex;
-        }
-        
-        .hinweis-box {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            width: 400px;
-            max-width: 90%;
-        }
-        
-        .hinweis-box h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .hinweis-box textarea {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            font-size: 0.9em;
-            font-family: inherit;
-            resize: vertical;
-            margin-bottom: 20px;
-        }
-        
-        .hinweis-box textarea:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-        
-        .hinweis-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        
-        .hinweis-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-        }
-        
-        .hinweis-btn.save {
-            background: #27ae60;
-            color: white;
-        }
-        
-        .hinweis-btn.cancel {
-            background: #95a5a6;
-            color: white;
-        }
-        
-        /* Footer mit Erklärungen */
-        .explanations-footer {
-            background: #f8f9fa;
-            border-top: 2px solid #3498db;
-            padding: 8px 15px;
-            flex-shrink: 0;
-            font-size: 0.8em;
-        }
-        
-        .explanation-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 4px;
-            flex-wrap: wrap;
-        }
-        
-        .explanation-title {
-            font-weight: bold;
-            color: #2c3e50;
-            min-width: 110px;
-            font-size: 0.85em;
-        }
-        
-        .explanation-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 15px;
-            flex: 1;
-        }
-        
-        .explanation-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            white-space: nowrap;
-        }
-        
-        .explanation-code {
-            font-weight: bold;
-            color: #e74c3c;
-            background: #ffebee;
-            padding: 1px 5px;
-            border-radius: 3px;
-            font-size: 0.8em;
-        }
-        
-        .zusatz-nummer {
-            font-weight: bold;
-            color: #27ae60;
-            background: #e8f5e9;
-            padding: 1px 5px;
-            border-radius: 3px;
-            font-size: 0.8em;
-        }
-        
-        .app-footer {
-            background: #34495e;
-            color: white;
-            text-align: center;
-            padding: 4px;
-            font-size: 0.7em;
-            flex-shrink: 0;
-        }
-        
-        /* Edit Mode */
-        body.editing-enabled td:not(.category-row td) {
-            cursor: pointer;
-        }
-        
-        .edit-mode-indicator {
-            background: #27ae60;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75em;
-            margin-left: 10px;
-        }
-
-        /* Overlay für Dropdown-Hintergrund */
-        .dropdown-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.3);
-            z-index: 9999;
-            display: none;
-        }
-        
-        .dropdown-overlay.show {
-            display: block;
-        }
+        .page-header { padding: 8px 15px; background: #f8f9fa; border-bottom: 2px solid #3498db; flex-shrink: 0; }
+        .page-header h2 { font-size: 1.1em; color: #2c3e50; }
+        .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+        .page { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+        .table-container { flex: 1; overflow: auto; background: white; min-height: 0; }
+        table { width: 100%; border-collapse: collapse; border: 1px solid #34495e; font-size: 0.8em; table-layout: fixed; min-width: 1300px; }
+        th { background: #34495e; color: white; font-weight: 600; text-align: center; border: 1px solid #2c3e50; padding: 6px 2px; position: sticky; top: 0; z-index: 10; font-size: 0.75em; }
+        td { padding: 4px 2px; border: 1px solid #bdc3c7; text-align: center; vertical-align: middle; cursor: default; transition: background-color 0.2s; height: 32px; }
+        td.allergen-active { background-color: #ffebee; border: 2px solid #e74c3c; }
+        td.allergen-selected { background-color: #ffcdd2; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        tr.category-row { background: #3498db; color: white; font-weight: bold; }
+        tr.category-row td { background: #3498db; color: white; border: 1px solid #2980b9; padding: 8px 5px; font-size: 0.9em; text-align: left; padding-left: 15px; }
+        .cell-content { min-height: 24px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 2px; }
+        .value-tag { background: #e3f2fd; padding: 2px 4px; border-radius: 10px; font-size: 0.7em; font-weight: 600; color: #1976d2; display: inline-block; cursor: default; }
+        .hinweis-cell { cursor: pointer; text-align: left; vertical-align: middle; }
+        .hinweis-text { font-size: 0.75em; color: #2c3e50; line-height: 1.3; word-break: break-word; white-space: normal; display: inline-block; width: 100%; text-align: left; padding: 0 4px; }
+        .custom-dropdown { position: fixed; background: white; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); max-height: 350px; overflow-y: auto; z-index: 10000; min-width: 260px; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: 90vw; }
+        @media (max-width: 768px) { .custom-dropdown { width: 90%; left: 5%; transform: translateY(10px); top: auto; bottom: 10px; } }
+        .dropdown-header { padding: 12px 15px; background: #f5f5f5; border-bottom: 1px solid #ddd; font-weight: bold; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 5; border-radius: 8px 8px 0 0; }
+        .close-btn { background: none; border: none; font-size: 1.2em; cursor: pointer; color: #666; padding: 0 8px; }
+        .close-btn:hover { color: #000; }
+        .dropdown-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; display: flex; align-items: center; gap: 10px; }
+        .dropdown-item:hover { background-color: #e3f2fd; }
+        .dropdown-item.selected { background-color: #bbdefb; }
+        .dropdown-item input[type="checkbox"] { margin: 0; cursor: pointer; pointer-events: none; width: 18px; height: 18px; }
+        .dropdown-footer { padding: 12px 15px; background: #f5f5f5; border-top: 1px solid #ddd; display: flex; justify-content: space-between; position: sticky; bottom: 0; z-index: 5; border-radius: 0 0 8px 8px; }
+        .dropdown-btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; font-weight: 600; }
+        .dropdown-btn.clear { background: #f44336; color: white; }
+        .dropdown-btn.clear:hover { background: #d32f2f; }
+        .dropdown-btn.close { background: #4caf50; color: white; }
+        .dropdown-btn.close:hover { background: #45a049; }
+        .hinweis-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 20000; }
+        .hinweis-modal.show { display: flex; }
+        .hinweis-box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); width: 400px; max-width: 90%; }
+        .hinweis-box h3 { color: #2c3e50; margin-bottom: 15px; font-size: 1.2em; }
+        .hinweis-box textarea { width: 100%; padding: 10px; border: 2px solid #bdc3c7; border-radius: 6px; font-size: 0.9em; font-family: inherit; resize: vertical; margin-bottom: 20px; }
+        .hinweis-box textarea:focus { outline: none; border-color: #3498db; }
+        .hinweis-buttons { display: flex; gap: 10px; justify-content: flex-end; }
+        .hinweis-btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; font-weight: 600; }
+        .hinweis-btn.save { background: #27ae60; color: white; }
+        .hinweis-btn.cancel { background: #95a5a6; color: white; }
+        .explanations-footer { background: #f8f9fa; border-top: 2px solid #3498db; padding: 8px 15px; flex-shrink: 0; font-size: 0.8em; }
+        .explanation-row { display: flex; align-items: center; margin-bottom: 4px; flex-wrap: wrap; }
+        .explanation-title { font-weight: bold; color: #2c3e50; min-width: 110px; font-size: 0.85em; }
+        .explanation-items { display: flex; flex-wrap: wrap; gap: 8px 15px; flex: 1; }
+        .explanation-item { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+        .explanation-code { font-weight: bold; color: #e74c3c; background: #ffebee; padding: 1px 5px; border-radius: 3px; font-size: 0.8em; }
+        .zusatz-nummer { font-weight: bold; color: #27ae60; background: #e8f5e9; padding: 1px 5px; border-radius: 3px; font-size: 0.8em; }
+        .app-footer { background: #34495e; color: white; text-align: center; padding: 4px; font-size: 0.7em; flex-shrink: 0; }
+        body.editing-enabled td:not(.category-row td) { cursor: pointer; }
+        .edit-mode-indicator { background: #27ae60; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 10px; }
+        .dropdown-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 9999; display: none; }
+        .dropdown-overlay.show { display: block; }
     </style>
 </head>
 <body>
-    <!-- Overlay für Dropdown -->
     <div class="dropdown-overlay" id="dropdownOverlay" onclick="closeDropdown()"></div>
-
-    <!-- PIN Modal -->
     <div class="pin-modal" id="pinModal">
         <div class="pin-box">
             <h3>🔐 PIN für Bearbeitung</h3>
@@ -674,8 +109,6 @@
             <div class="pin-error" id="pinError">Falscher PIN</div>
         </div>
     </div>
-
-    <!-- Hinweis-Editor Modal -->
     <div class="hinweis-modal" id="hinweisModal">
         <div class="hinweis-box">
             <h3>📝 Hinweis bearbeiten</h3>
@@ -686,770 +119,100 @@
             </div>
         </div>
     </div>
-
     <div class="container">
-        <!-- Header mit Logo und Edit-Button -->
         <div class="app-header">
-            <div class="logo">
-                <div class="logo-icon">🌡️</div>
-                <div>Primel Eiscafé - Temperaturkontrolle</div>
-            </div>
-            <div>
-                <button class="edit-btn" id="editBtn" onclick="startEditing()">✏️ Bearbeiten</button>
-                <button class="back-btn" onclick="window.location.href='index.html'">← Zurück</button>
-            </div>
+            <div class="logo"><div class="logo-icon">🌡️</div><div>Primel Eiscafé - Temperaturkontrolle</div></div>
+            <div><button class="edit-btn" id="editBtn" onclick="startEditing()">✏️ Bearbeiten</button><button class="back-btn" onclick="window.location.href='index.html'">← Zurück</button></div>
         </div>
-        
-        <!-- Toolbar -->
         <div class="toolbar">
-            <div class="month-selector">
-                <label>Monat / Jahr:</label>
-                <input type="month" id="monthSelector" value="2026-03">
-            </div>
+            <div class="month-selector"><label>Monat / Jahr:</label><input type="month" id="monthSelector" value="2026-03"></div>
             <button class="btn btn-primary" onclick="loadMonth()">Laden</button>
             <button class="btn btn-success" onclick="saveData()">💾 Speichern</button>
             <button class="btn btn-print" onclick="window.print()">🖨️ Drucken</button>
             <span id="editModeIndicator" class="edit-mode-indicator" style="display: none;">✏️ Bearbeitungsmodus</span>
         </div>
-        
-        <!-- Page Header -->
-        <div class="page-header">
-            <h2 id="pageTitle">Temperaturkontrolle - Allergene & Zusatzstoffe (03.2026)</h2>
-        </div>
-        
-        <div class="content">
-            <div class="page">
-                <!-- Table Container -->
-                <div class="table-container" id="tableContainer">
-                    <table id="allergeneTable">
-                        <thead>
-                            <tr>
-                                <th>Produkt</th>
-                                <th>Gluten</th>
-                                <th>Schalen-<br>früchte</th>
-                                <th>Fisch</th>
-                                <th>Eier</th>
-                                <th>Krebs-<br>tiere</th>
-                                <th>Weich-<br>tiere</th>
-                                <th>Erd-<br>nüsse</th>
-                                <th>Sesam</th>
-                                <th>Soja</th>
-                                <th>Lupine</th>
-                                <th>Sellerie</th>
-                                <th>Senf</th>
-                                <th>Milch &<br>Laktose</th>
-                                <th>Sulfite</th>
-                                <th>Zusatz-<br>stoffe</th>
-                                <th style="min-width: 100px;">Hinweis</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Erklärungen Footer -->
+        <div class="page-header"><h2 id="pageTitle">Temperaturkontrolle - Allergene & Zusatzstoffe (03.2026)</h2></div>
+        <div class="content"><div class="page"><div class="table-container" id="tableContainer">
+            <table id="allergeneTable"><thead><tr><th>Produkt</th><th>Gluten</th><th>Schalen-<br>früchte</th><th>Fisch</th><th>Eier</th><th>Krebs-<br>tiere</th><th>Weich-<br>tiere</th><th>Erd-<br>nüsse</th><th>Sesam</th><th>Soja</th><th>Lupine</th><th>Sellerie</th><th>Senf</th><th>Milch &<br>Laktose</th><th>Sulfite</th><th>Zusatz-<br>stoffe</th><th style="min-width:100px;">Hinweis</th></tr></thead><tbody id="tableBody"></tbody></table>
+        </div></div></div>
         <div class="explanations-footer">
-            <div class="explanation-row">
-                <span class="explanation-title">🌾 Gluten:</span>
-                <div class="explanation-items">
-                    <span class="explanation-item"><span class="explanation-code">A1</span> Weizen</span>
-                    <span class="explanation-item"><span class="explanation-code">A2</span> Roggen</span>
-                    <span class="explanation-item"><span class="explanation-code">A3</span> Gerste</span>
-                    <span class="explanation-item"><span class="explanation-code">A4</span> Hafer</span>
-                    <span class="explanation-item"><span class="explanation-code">A5</span> Dinkel</span>
-                    <span class="explanation-item"><span class="explanation-code">A6</span> Kamut</span>
-                </div>
-            </div>
-            <div class="explanation-row">
-                <span class="explanation-title">🥜 Schalenfrüchte:</span>
-                <div class="explanation-items">
-                    <span class="explanation-item"><span class="explanation-code">H1</span> Mandel</span>
-                    <span class="explanation-item"><span class="explanation-code">H2</span> Haselnuss</span>
-                    <span class="explanation-item"><span class="explanation-code">H3</span> Walnuss</span>
-                    <span class="explanation-item"><span class="explanation-code">H4</span> Cashew</span>
-                    <span class="explanation-item"><span class="explanation-code">H5</span> Pekan</span>
-                    <span class="explanation-item"><span class="explanation-code">H6</span> Paranuss</span>
-                    <span class="explanation-item"><span class="explanation-code">H7</span> Pistazie</span>
-                    <span class="explanation-item"><span class="explanation-code">H8</span> Macadamia</span>
-                </div>
-            </div>
-            <div class="explanation-row">
-                <span class="explanation-title">🧪 Zusatzstoffe:</span>
-                <div class="explanation-items">
-                    <span class="explanation-item"><span class="zusatz-nummer">1</span> Farbstoff</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">2</span> Konservierungsstoffe</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">3</span> Nitratpökelsalz</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">4</span> Antioxidationsmittel</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">5</span> Geschmacksverstärker</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">6</span> geschwefelt</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">7</span> geschwärzt</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">8</span> gewachst</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">9</span> Phosphat</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">10</span> Süßungsmittel</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">11</span> Milcheiweiß</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">12</span> koffeinhaltig</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">13</span> alkoholhaltig</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">14</span> chininhaltig</span>
-                    <span class="explanation-item"><span class="zusatz-nummer">15</span> Phenylalanin</span>
-                </div>
-            </div>
+            <div class="explanation-row"><span class="explanation-title">🌾 Gluten:</span><div class="explanation-items"><span class="explanation-item"><span class="explanation-code">A1</span> Weizen</span><span class="explanation-item"><span class="explanation-code">A2</span> Roggen</span><span class="explanation-item"><span class="explanation-code">A3</span> Gerste</span><span class="explanation-item"><span class="explanation-code">A4</span> Hafer</span><span class="explanation-item"><span class="explanation-code">A5</span> Dinkel</span><span class="explanation-item"><span class="explanation-code">A6</span> Kamut</span></div></div>
+            <div class="explanation-row"><span class="explanation-title">🥜 Schalenfrüchte:</span><div class="explanation-items"><span class="explanation-item"><span class="explanation-code">H1</span> Mandel</span><span class="explanation-item"><span class="explanation-code">H2</span> Haselnuss</span><span class="explanation-item"><span class="explanation-code">H3</span> Walnuss</span><span class="explanation-item"><span class="explanation-code">H4</span> Cashew</span><span class="explanation-item"><span class="explanation-code">H5</span> Pekan</span><span class="explanation-item"><span class="explanation-code">H6</span> Paranuss</span><span class="explanation-item"><span class="explanation-code">H7</span> Pistazie</span><span class="explanation-item"><span class="explanation-code">H8</span> Macadamia</span></div></div>
+            <div class="explanation-row"><span class="explanation-title">🧪 Zusatzstoffe:</span><div class="explanation-items"><span class="explanation-item"><span class="zusatz-nummer">1</span> Farbstoff</span><span class="explanation-item"><span class="zusatz-nummer">2</span> Konservierungsstoffe</span><span class="explanation-item"><span class="zusatz-nummer">3</span> Nitratpökelsalz</span><span class="explanation-item"><span class="zusatz-nummer">4</span> Antioxidationsmittel</span><span class="explanation-item"><span class="zusatz-nummer">5</span> Geschmacksverstärker</span><span class="explanation-item"><span class="zusatz-nummer">6</span> geschwefelt</span><span class="explanation-item"><span class="zusatz-nummer">7</span> geschwärzt</span><span class="explanation-item"><span class="zusatz-nummer">8</span> gewachst</span><span class="explanation-item"><span class="zusatz-nummer">9</span> Phosphat</span><span class="explanation-item"><span class="zusatz-nummer">10</span> Süßungsmittel</span><span class="explanation-item"><span class="zusatz-nummer">11</span> Milcheiweiß</span><span class="explanation-item"><span class="zusatz-nummer">12</span> koffeinhaltig</span><span class="explanation-item"><span class="zusatz-nummer">13</span> alkoholhaltig</span><span class="explanation-item"><span class="zusatz-nummer">14</span> chininhaltig</span><span class="explanation-item"><span class="zusatz-nummer">15</span> Phenylalanin</span></div></div>
         </div>
-        
-        <div class="app-footer">
-            <p>© 2026 Primel Eiscafé - Temperaturkontrolle</p>
-        </div>
+        <div class="app-footer"><p>© 2026 Primel Eiscafé - Temperaturkontrolle</p></div>
     </div>
-
     <script>
-        // ==================== FIREBASE KONFIGURATION ====================
-        // 🔴🔴🔴 ضع رابط Firebase API هنا 🔴🔴🔴
+        // ==================== FIREBASE KONFIGURATION (Realtime Database) ====================
         const firebaseConfig = {
             apiKey: "AIzaSyAf6htsYjMk2vgKg6ZWI7Wkl-e2_3f9oqs",
             authDomain: "kellnerorder.firebaseapp.com",
+            databaseURL: "https://kellnerorder-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "kellnerorder",
             storageBucket: "kellnerorder.firebasestorage.app",
             messagingSenderId: "670485088629",
             appId: "1:670485088629:web:6a34454d057e3e050b2b3c",
             measurementId: "G-FZFN6G8FYM"
         };
-        // 🔴🔴🔴 انتهى مكان رابط Firebase 🔴🔴🔴
-
-        // تهيئة Firebase
+        
         let db = null;
         let firebaseInitialized = false;
         
         try {
             if (firebaseConfig.apiKey) {
                 firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
+                db = firebase.database(); // استخدام Realtime Database
                 firebaseInitialized = true;
-                console.log("✅ Firebase initialized successfully");
+                console.log("✅ Firebase (Realtime DB) initialized successfully");
             } else {
-                console.warn("⚠️ Firebase configuration missing. Please add your firebaseConfig.");
+                console.warn("⚠️ Firebase configuration missing.");
             }
         } catch (e) {
             console.error("❌ Firebase initialization error:", e);
         }
 
-        // ==================== PRODUKTDATEN MIT KATEGORIEN ====================
+        // ==================== PRODUKTDATEN ====================
         const categories = [
-            {
-                name: "🍦 Eissorten",
-                products: [
-                    "Vanille", "Schokolade", "Dunkel Schokolade", "Dubai Schokolade", 
-                    "Haselnuss", "Mokka", "Stracciatella", "Amarena", "Pistazie",
-                    "Joghurt", "Joghurt Mango", "After Eight", "Cookies", "Louus", "Raffaello",
-                    "Rocher", "Donauwelle", "Karamell", "Snickers", "Nuttela",
-                    "Tiramisu", "Oreo", "Malaga", "Blauer Himmel", "Zitrone",
-                    "Erdbeere", "Himbeere", "Waldbeere", "Mango", "Maracuja",
-                    "Wasser Melone", "Banane"
-                ]
-            },
-            {
-                name: "🍨 Extra",
-                products: [
-                    "Sahne", "Eierlikör", "Nusslikör", "Krokant", "Amarena (Extra)",
-                    "Nuss", "Walnuss", "Schokosoße", "Schokoraspel", "Primelrolle",
-                    "Smarties", "Streusel", "Portion Obst", "Erdbeeren (Extra)",
-                    "Baileys", "Rum", "Amaretto"
-                ]
-            },
-
-            {
-                name: "🥤 Getränke / Shakes",
-                products: [
-                    "Kaffee", "Cappuccino", "Espresso", "Milchkaffee", "Latte Macchiato",
-                    "Affogato", "Americano", "Kakao", "Kakao mit Sahne", "TEE",
-                    "Frischer Orangensaft", "Cola", "Cola light", "Cola Zeero", "Lemo, Orange",
-                    "Apfelschorle", "Milchshake", "Milchshake mit Sahne", "Wasser",
-                    "Tonic Water", "Eiskakao", "Eiskaffee", "Eislatte", "Bier alkoholfrei"
-                ]
-            },
-            {
-                name: "🧇 Waffel",
-                products: [
-                    "Waffel-Puderzucker", "Waffel-Klassik", "Banane, Zimt", "Tutti Frutti",
-                    "Waffel-Amarena", "Waffel Heiße Kirsche", "Waffel-Erdbeer"
-                ]
-            }
+            { name: "🍦 Eissorten", products: ["Vanille","Schokolade","Dunkel Schokolade","Dubai Schokolade","Haselnuss","Mokka","Stracciatella","Amarena","Pistazie","Joghurt","Joghurt Mango","After Eight","Cookies","Louus","Raffaello","Rocher","Donauwelle","Karamell","Snickers","Nuttela","Tiramisu","Oreo","Malaga","Blauer Himmel","Zitrone","Erdbeere","Himbeere","Waldbeere","Mango","Maracuja","Wasser Melone","Banane"] },
+            { name: "🍨 Extra", products: ["Sahne","Eierlikör","Nusslikör","Krokant","Amarena (Extra)","Nuss","Walnuss","Schokosoße","Schokoraspel","Primelrolle","Smarties","Streusel","Portion Obst","Erdbeeren (Extra)","Baileys","Rum","Amaretto"] },
+            { name: "🥤 Getränke / Shakes", products: ["Kaffee","Cappuccino","Espresso","Milchkaffee","Latte Macchiato","Affogato","Americano","Kakao","Kakao mit Sahne","TEE","Frischer Orangensaft","Cola","Cola light","Cola Zeero","Lemo, Orange","Apfelschorle","Milchshake","Milchshake mit Sahne","Wasser","Tonic Water","Eiskakao","Eiskaffee","Eislatte","Bier alkoholfrei"] },
+            { name: "🧇 Waffel", products: ["Waffel-Puderzucker","Waffel-Klassik","Banane, Zimt","Tutti Frutti","Waffel-Amarena","Waffel Heiße Kirsche","Waffel-Erdbeer"] }
         ];
         
-        // ==================== DROPDOWN OPTIONEN ====================
-        const dropdownOptions = {
-            1: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'], // Gluten
-            2: ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8'], // Schalenfrüchte
-            15: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'] // Zusatzstoffe
-        };
+        const dropdownOptions = { 1: ['A1','A2','A3','A4','A5','A6'], 2: ['H1','H2','H3','H4','H5','H6','H7','H8'], 15: ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'] };
         
-        // ==================== STATE ====================
-        let isEditing = false;
-        let activeCell = null;
-        let activeDropdown = null;
-        let activeHinweisProductIndex = null;
-        let cellData = {}; // Allergen-Daten
-        let hinweisData = {}; // Hinweis-Texte
-        let editTimeout = null;
-        let productIndexMap = {}; // Mapping von Produktnamen zu Index
-        let isLoading = false; // Verhindert Endlosschleife beim Laden
-        let saveTimeout = null; // Debounce für automatisches Speichern
+        let isEditing = false, activeCell = null, activeDropdown = null, activeHinweisProductIndex = null;
+        let cellData = {}, hinweisData = {}, editTimeout = null, productIndexMap = {}, isLoading = false, saveTimeout = null;
         
-        // ==================== INITIALISIERUNG ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            buildProductIndexMap();
-            buildTable();
-            loadSavedData();
-            loadMonth();
-        });
+        document.addEventListener('DOMContentLoaded', function() { buildProductIndexMap(); buildTable(); loadSavedData(); loadMonth(); });
         
-        // ==================== PRODUCT INDEX MAP ====================
-        function buildProductIndexMap() {
-            let index = 0;
-            categories.forEach(category => {
-                category.products.forEach(product => {
-                    productIndexMap[product] = index++;
-                });
-            });
-        }
-        
-        // ==================== PIN FUNKTIONEN ====================
-        function startEditing() {
-            document.getElementById('pinModal').classList.add('show');
-            document.getElementById('pinInput').value = '';
-            document.getElementById('pinError').style.display = 'none';
-            document.getElementById('pinInput').focus();
-        }
-        
-        function closePinModal() {
-            document.getElementById('pinModal').classList.remove('show');
-        }
-        
-        function verifyPin() {
-            const pin = document.getElementById('pinInput').value;
-            if (pin === '1234') {
-                isEditing = true;
-                document.body.classList.add('editing-enabled');
-                document.getElementById('editModeIndicator').style.display = 'inline-block';
-                document.getElementById('editBtn').classList.add('active');
-                closePinModal();
-                
-                // Timer für 30 Minuten (1800000 Millisekunden)
-                if (editTimeout) clearTimeout(editTimeout);
-                editTimeout = setTimeout(() => {
-                    if (isEditing) {
-                        stopEditing();
-                        alert('⏰ Bearbeitungsmodus automatisch deaktiviert nach 30 Minuten');
-                    }
-                }, 1800000);
-                
-                setTimeout(() => {
-                    alert('✅ Bearbeitungsmodus aktiviert für 30 Minuten');
-                }, 100);
-            } else {
-                document.getElementById('pinError').style.display = 'block';
-                document.getElementById('pinInput').value = '';
-            }
-        }
-        
-        function stopEditing() {
-            isEditing = false;
-            document.body.classList.remove('editing-enabled');
-            document.getElementById('editModeIndicator').style.display = 'none';
-            document.getElementById('editBtn').classList.remove('active');
-            if (editTimeout) clearTimeout(editTimeout);
-            closeDropdown();
-        }
-        
-        // ==================== DROPDOWN SCHLIESSEN ====================
-        function closeDropdown() {
-            if (activeDropdown) {
-                activeDropdown.remove();
-                activeDropdown = null;
-            }
-            if (activeCell) {
-                activeCell.classList.remove('allergen-active');
-                activeCell = null;
-            }
-            document.getElementById('dropdownOverlay').classList.remove('show');
-        }
-        
-        // ==================== HINWEIS MODAL ====================
-        function openHinweisModal(productIndex) {
-            if (!isEditing) return;
-            activeHinweisProductIndex = productIndex;
-            const currentText = hinweisData[productIndex] || '';
-            document.getElementById('hinweisTextarea').value = currentText;
-            document.getElementById('hinweisModal').classList.add('show');
-        }
-        
-        function closeHinweisModal() {
-            document.getElementById('hinweisModal').classList.remove('show');
-            activeHinweisProductIndex = null;
-        }
-        
-        function saveHinweis() {
-            if (activeHinweisProductIndex !== null) {
-                const newText = document.getElementById('hinweisTextarea').value;
-                if (newText && newText.trim() !== '') {
-                    hinweisData[activeHinweisProductIndex] = newText.trim();
-                } else {
-                    delete hinweisData[activeHinweisProductIndex];
-                }
-                updateHinweisCell(activeHinweisProductIndex);
-                // حفظ تلقائي في Firebase بعد تغيير Hinweis
-                autoSaveToFirebase();
-            }
-            closeHinweisModal();
-        }
-        
-        function updateHinweisCell(productIndex) {
-            const cell = document.querySelector(`td.hinweis-cell[data-product-index="${productIndex}"]`);
-            if (cell) {
-                const text = hinweisData[productIndex] || '';
-                cell.innerHTML = `<div class="hinweis-text">${escapeHtml(text)}</div>`;
-            }
-        }
-        
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            }).replace(/\n/g, '<br>');
-        }
-        
-        // ==================== TABLELLE BAUEN ====================
-        function buildTable() {
-            const tbody = document.getElementById('tableBody');
-            if (!tbody) return;
-            
-            tbody.innerHTML = '';
-            
-            categories.forEach(category => {
-                // Kategorie-Zeile einfügen
-                const categoryRow = document.createElement('tr');
-                categoryRow.className = 'category-row';
-                const categoryCell = document.createElement('td');
-                categoryCell.colSpan = 17; // +1 für Hinweis-Spalte
-                categoryCell.textContent = category.name;
-                categoryRow.appendChild(categoryCell);
-                tbody.appendChild(categoryRow);
-                
-                // Produkte der Kategorie
-                category.products.forEach(product => {
-                    const productIndex = productIndexMap[product];
-                    const row = document.createElement('tr');
-                    
-                    // Produktname
-                    const nameCell = document.createElement('td');
-                    nameCell.textContent = product;
-                    nameCell.style.fontWeight = '500';
-                    nameCell.style.textAlign = 'left';
-                    nameCell.style.paddingLeft = '15px';
-                    nameCell.style.cursor = 'default';
-                    row.appendChild(nameCell);
-                    
-                    // 15 Allergen-Spalten
-                    for (let col = 1; col <= 15; col++) {
-                        const cell = document.createElement('td');
-                        cell.dataset.productIndex = productIndex;
-                        cell.dataset.column = col;
-                        cell.dataset.productName = product;
-                        
-                        const contentDiv = document.createElement('div');
-                        contentDiv.className = 'cell-content';
-                        contentDiv.id = `cell-${productIndex}-${col}`;
-                        cell.appendChild(contentDiv);
-                        
-                        cell.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            onCellClick(e, cell, productIndex, col);
-                        });
-                        
-                        row.appendChild(cell);
-                    }
-                    
-                    // Hinweis-Spalte
-                    const hinweisCell = document.createElement('td');
-                    hinweisCell.className = 'hinweis-cell';
-                    hinweisCell.dataset.productIndex = productIndex;
-                    hinweisCell.style.cursor = 'pointer';
-                    hinweisCell.style.textAlign = 'left';
-                    hinweisCell.style.verticalAlign = 'middle';
-                    hinweisCell.style.maxWidth = '200px';
-                    hinweisCell.style.wordBreak = 'break-word';
-                    hinweisCell.style.whiteSpace = 'normal';
-                    const text = hinweisData[productIndex] || '';
-                    hinweisCell.innerHTML = `<div class="hinweis-text">${escapeHtml(text)}</div>`;
-                    hinweisCell.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        openHinweisModal(productIndex);
-                    });
-                    row.appendChild(hinweisCell);
-                    
-                    tbody.appendChild(row);
-                });
-            });
-        }
-        
-        // ==================== ZELLKLICK HANDLER ====================
-        function onCellClick(event, cell, productIndex, column) {
-            event.stopPropagation();
-            
-            if (!isEditing) return;
-            
-            if (activeCell === cell) {
-                clearCell(productIndex, column);
-                cell.classList.remove('allergen-active');
-                activeCell = null;
-                closeDropdown();
-                return;
-            }
-            
-            if (activeCell) {
-                activeCell.classList.remove('allergen-active');
-            }
-            
-            cell.classList.add('allergen-active');
-            activeCell = cell;
-            
-            closeDropdown();
-            
-            if (dropdownOptions[column]) {
-                showDropdown(event, cell, productIndex, column, dropdownOptions[column]);
-            } else {
-                toggleSimpleCell(productIndex, column, cell);
-            }
-        }
-        
-        // ==================== EINFACHE ZELLE UMSCHALTEN ====================
-        function toggleSimpleCell(productIndex, column, cell) {
-            const key = `${productIndex}-${column}`;
-            
-            if (cellData[key]) {
-                delete cellData[key];
-                updateCellValue(productIndex, column, '');
-                cell.classList.remove('allergen-selected');
-            } else {
-                cellData[key] = 'X';
-                updateCellValue(productIndex, column, 'X');
-                cell.classList.add('allergen-selected');
-            }
-            
-            cell.classList.remove('allergen-active');
-            activeCell = null;
-            // حفظ تلقائي بعد تغيير الخلية
-            autoSaveToFirebase();
-        }
-        
-        // ==================== ZELLE LEEREN ====================
-        function clearCell(productIndex, column) {
-            const key = `${productIndex}-${column}`;
-            delete cellData[key];
-            
-            updateCellValue(productIndex, column, '');
-            
-            const cell = document.querySelector(`td[data-product-index="${productIndex}"][data-column="${column}"]`);
-            if (cell) {
-                cell.classList.remove('allergen-selected');
-            }
-            autoSaveToFirebase();
-        }
-        
-        // ==================== DROPDOWN ANZEIGEN ====================
-        function showDropdown(event, cell, productIndex, column, options) {
-            const dropdown = document.createElement('div');
-            dropdown.className = 'custom-dropdown';
-            
-            const key = `${productIndex}-${column}`;
-            const currentValues = cellData[key] ? cellData[key].split(',').map(v => v.trim()) : [];
-            
-            document.getElementById('dropdownOverlay').classList.add('show');
-            
-            const header = document.createElement('div');
-            header.className = 'dropdown-header';
-            header.innerHTML = `
-                <span>Optionen wählen</span>
-                <button class="close-btn" onclick="event.stopPropagation(); closeDropdown();">✕</button>
-            `;
-            dropdown.appendChild(header);
-            
-            options.forEach(option => {
-                const item = document.createElement('div');
-                item.className = 'dropdown-item';
-                if (currentValues.includes(option)) {
-                    item.classList.add('selected');
-                }
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = option;
-                checkbox.checked = currentValues.includes(option);
-                
-                const label = document.createElement('span');
-                label.textContent = option;
-                
-                item.appendChild(checkbox);
-                item.appendChild(label);
-                
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    checkbox.checked = !checkbox.checked;
-                    
-                    if (checkbox.checked) {
-                        item.classList.add('selected');
-                    } else {
-                        item.classList.remove('selected');
-                    }
-                });
-                
-                dropdown.appendChild(item);
-            });
-            
-            const footer = document.createElement('div');
-            footer.className = 'dropdown-footer';
-            
-            const clearBtn = document.createElement('button');
-            clearBtn.className = 'dropdown-btn clear';
-            clearBtn.textContent = 'Alle löschen';
-            clearBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                
-                dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    cb.checked = false;
-                    cb.closest('.dropdown-item').classList.remove('selected');
-                });
-                
-                delete cellData[key];
-                updateCellValue(productIndex, column, '');
-                cell.classList.remove('allergen-selected');
-                autoSaveToFirebase();
-            });
-            
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'dropdown-btn close';
-            closeBtn.textContent = 'Fertig';
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                
-                const selected = [];
-                dropdown.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                    selected.push(cb.value);
-                });
-                
-                if (selected.length > 0) {
-                    cellData[key] = selected.join(', ');
-                    updateCellValue(productIndex, column, selected.join(', '));
-                    cell.classList.add('allergen-selected');
-                } else {
-                    delete cellData[key];
-                    updateCellValue(productIndex, column, '');
-                    cell.classList.remove('allergen-selected');
-                }
-                
-                closeDropdown();
-                autoSaveToFirebase();
-            });
-            
-            footer.appendChild(clearBtn);
-            footer.appendChild(closeBtn);
-            dropdown.appendChild(footer);
-            
-            document.body.appendChild(dropdown);
-            activeDropdown = dropdown;
-        }
-        
-        // ==================== ZELLWERT AKTUALISIEREN ====================
-        function updateCellValue(productIndex, column, value) {
-            const contentDiv = document.getElementById(`cell-${productIndex}-${col}`);
-            if (!contentDiv) return;
-            
-            contentDiv.innerHTML = '';
-            
-            if (value && value !== '') {
-                const values = value.split(',').map(v => v.trim());
-                values.forEach(val => {
-                    const tag = document.createElement('span');
-                    tag.className = 'value-tag';
-                    tag.textContent = val;
-                    contentDiv.appendChild(tag);
-                });
-            }
-        }
-        
-        // ==================== AUTO-SAVE ZU FIREBASE (mit Debounce) ====================
-        function autoSaveToFirebase() {
-            if (!firebaseInitialized || isLoading) return;
-            
-            // Debounce: لا نحفظ في كل تغيير لحظي، ننتظر 500ms
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                saveToFirebase();
-            }, 500);
-        }
-        
-        // ==================== SPEICHERN ZU FIREBASE ====================
-        async function saveToFirebase() {
-            if (!firebaseInitialized) {
-                console.warn("Firebase not initialized. Data saved to localStorage as fallback.");
-                saveToLocalStorageFallback();
-                return;
-            }
-            
-            try {
-                const currentMonth = document.getElementById('monthSelector').value;
-                const docRef = db.collection("temperaturkontrolle").doc(currentMonth);
-                
-                const dataToSave = {
-                    allergens: cellData,
-                    hinweise: hinweisData,
-                    lastUpdated: new Date().toISOString()
-                };
-                
-                await docRef.set(dataToSave);
-                console.log("✅ Data saved to Firebase for month:", currentMonth);
-                showSaveIndicator(true);
-            } catch (error) {
-                console.error("❌ Error saving to Firebase:", error);
-                showSaveIndicator(false);
-                // Fallback: حفظ في localStorage
-                saveToLocalStorageFallback();
-            }
-        }
-        
-        // ==================== FALLBACK: LOCALSTORAGE ====================
-        function saveToLocalStorageFallback() {
-            const allData = {
-                allergens: cellData,
-                hinweise: hinweisData
-            };
-            localStorage.setItem('temperaturkontrolle_data', JSON.stringify(allData));
-            console.log("💾 Data saved to localStorage as fallback");
-        }
-        
-        // ==================== مؤشر حفظ بسيط ====================
-        function showSaveIndicator(success) {
-            const saveBtn = document.querySelector('.btn-success');
-            if (!saveBtn) return;
-            const originalText = saveBtn.innerHTML;
-            if (success) {
-                saveBtn.innerHTML = '✓ Gespeichert!';
-            } else {
-                saveBtn.innerHTML = '⚠️ Fehler!';
-            }
-            setTimeout(() => {
-                saveBtn.innerHTML = originalText;
-            }, 1500);
-        }
-        
-        // ==================== LADEN VON FIREBASE ====================
-        async function loadFromFirebase() {
-            if (!firebaseInitialized) {
-                console.warn("Firebase not initialized. Loading from localStorage.");
-                loadFromLocalStorage();
-                return;
-            }
-            
-            isLoading = true;
-            const currentMonth = document.getElementById('monthSelector').value;
-            
-            try {
-                const docRef = db.collection("temperaturkontrolle").doc(currentMonth);
-                const doc = await docRef.get();
-                
-                if (doc.exists) {
-                    const data = doc.data();
-                    cellData = data.allergens || {};
-                    hinweisData = data.hinweise || {};
-                    console.log("✅ Data loaded from Firebase for month:", currentMonth);
-                } else {
-                    // لا توجد بيانات لهذا الشهر، نبدأ بيانات فارغة
-                    cellData = {};
-                    hinweisData = {};
-                    console.log("ℹ️ No data found for month:", currentMonth, "starting fresh");
-                }
-                
-                // تحديث الواجهة
-                refreshUIFromData();
-            } catch (error) {
-                console.error("❌ Error loading from Firebase:", error);
-                loadFromLocalStorage();
-            } finally {
-                isLoading = false;
-            }
-        }
-        
-        // ==================== LADEN VON LOCALSTORAGE (Fallback) ====================
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('temperaturkontrolle_data');
-            if (saved) {
-                try {
-                    const allData = JSON.parse(saved);
-                    cellData = allData.allergens || {};
-                    hinweisData = allData.hinweise || {};
-                    refreshUIFromData();
-                    console.log("💾 Data loaded from localStorage as fallback");
-                } catch (e) {
-                    console.error('Fehler beim Laden der Daten', e);
-                }
-            }
-        }
-        
-        // ==================== تحديث الواجهة من البيانات ====================
-        function refreshUIFromData() {
-            // إعادة تعيين جميع الخلايا
-            for (let productIndex = 0; productIndex < Object.keys(productIndexMap).length; productIndex++) {
-                for (let col = 1; col <= 15; col++) {
-                    const key = `${productIndex}-${col}`;
-                    const value = cellData[key] || '';
-                    updateCellValue(productIndex, col, value);
-                    
-                    const cell = document.querySelector(`td[data-product-index="${productIndex}"][data-column="${col}"]`);
-                    if (cell) {
-                        if (value && value !== '') {
-                            cell.classList.add('allergen-selected');
-                        } else {
-                            cell.classList.remove('allergen-selected');
-                        }
-                    }
-                }
-            }
-            
-            // تحديث خلايا Hinweis
-            Object.keys(hinweisData).forEach(productIndex => {
-                updateHinweisCell(parseInt(productIndex));
-            });
-            
-            // إزالة أي خلايا Hinweis ليس لها بيانات
-            for (let productIndex = 0; productIndex < Object.keys(productIndexMap).length; productIndex++) {
-                if (!hinweisData[productIndex]) {
-                    updateHinweisCell(productIndex);
-                }
-            }
-        }
-        
-        // ==================== DATEN SPEICHERN (دالة رئيسية) ====================
-        function saveData() {
-            saveToFirebase();
-        }
-        
-        // ==================== DATEN LADEN (دالة رئيسية) ====================
-        function loadSavedData() {
-            loadFromFirebase();
-        }
-        
-        // ==================== MONAT LADEN ====================
-        function loadMonth() {
-            const monthSelector = document.getElementById('monthSelector');
-            const [year, month] = monthSelector.value.split('-');
-            document.getElementById('pageTitle').textContent = 
-                `Temperaturkontrolle - Allergene & Zusatzstoffe (${month}.${year})`;
-            // تحميل بيانات الشهر الجديد من Firebase
-            loadFromFirebase();
-        }
+        function buildProductIndexMap() { let index = 0; categories.forEach(c => c.products.forEach(p => productIndexMap[p] = index++)); }
+        function startEditing() { document.getElementById('pinModal').classList.add('show'); document.getElementById('pinInput').value = ''; document.getElementById('pinError').style.display = 'none'; document.getElementById('pinInput').focus(); }
+        function closePinModal() { document.getElementById('pinModal').classList.remove('show'); }
+        function verifyPin() { const pin = document.getElementById('pinInput').value; if (pin === '1234') { isEditing = true; document.body.classList.add('editing-enabled'); document.getElementById('editModeIndicator').style.display = 'inline-block'; document.getElementById('editBtn').classList.add('active'); closePinModal(); if (editTimeout) clearTimeout(editTimeout); editTimeout = setTimeout(() => { if (isEditing) { stopEditing(); alert('⏰ Bearbeitungsmodus automatisch deaktiviert nach 30 Minuten'); } }, 1800000); setTimeout(() => { alert('✅ Bearbeitungsmodus aktiviert für 30 Minuten'); }, 100); } else { document.getElementById('pinError').style.display = 'block'; document.getElementById('pinInput').value = ''; } }
+        function stopEditing() { isEditing = false; document.body.classList.remove('editing-enabled'); document.getElementById('editModeIndicator').style.display = 'none'; document.getElementById('editBtn').classList.remove('active'); if (editTimeout) clearTimeout(editTimeout); closeDropdown(); }
+        function closeDropdown() { if (activeDropdown) { activeDropdown.remove(); activeDropdown = null; } if (activeCell) { activeCell.classList.remove('allergen-active'); activeCell = null; } document.getElementById('dropdownOverlay').classList.remove('show'); }
+        function openHinweisModal(productIndex) { if (!isEditing) return; activeHinweisProductIndex = productIndex; document.getElementById('hinweisTextarea').value = hinweisData[productIndex] || ''; document.getElementById('hinweisModal').classList.add('show'); }
+        function closeHinweisModal() { document.getElementById('hinweisModal').classList.remove('show'); activeHinweisProductIndex = null; }
+        function saveHinweis() { if (activeHinweisProductIndex !== null) { const newText = document.getElementById('hinweisTextarea').value; if (newText && newText.trim() !== '') hinweisData[activeHinweisProductIndex] = newText.trim(); else delete hinweisData[activeHinweisProductIndex]; updateHinweisCell(activeHinweisProductIndex); autoSaveToFirebase(); } closeHinweisModal(); }
+        function updateHinweisCell(productIndex) { const cell = document.querySelector(`td.hinweis-cell[data-product-index="${productIndex}"]`); if (cell) { const text = hinweisData[productIndex] || ''; cell.innerHTML = `<div class="hinweis-text">${escapeHtml(text)}</div>`; } }
+        function escapeHtml(text) { if (!text) return ''; return text.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;').replace(/\n/g, '<br>'); }
+        function buildTable() { const tbody = document.getElementById('tableBody'); if (!tbody) return; tbody.innerHTML = ''; categories.forEach(category => { const categoryRow = document.createElement('tr'); categoryRow.className = 'category-row'; const categoryCell = document.createElement('td'); categoryCell.colSpan = 17; categoryCell.textContent = category.name; categoryRow.appendChild(categoryCell); tbody.appendChild(categoryRow); category.products.forEach(product => { const productIndex = productIndexMap[product]; const row = document.createElement('tr'); const nameCell = document.createElement('td'); nameCell.textContent = product; nameCell.style.fontWeight = '500'; nameCell.style.textAlign = 'left'; nameCell.style.paddingLeft = '15px'; row.appendChild(nameCell); for (let col = 1; col <= 15; col++) { const cell = document.createElement('td'); cell.dataset.productIndex = productIndex; cell.dataset.column = col; cell.dataset.productName = product; const contentDiv = document.createElement('div'); contentDiv.className = 'cell-content'; contentDiv.id = `cell-${productIndex}-${col}`; cell.appendChild(contentDiv); cell.addEventListener('click', (e) => { e.stopPropagation(); onCellClick(e, cell, productIndex, col); }); row.appendChild(cell); } const hinweisCell = document.createElement('td'); hinweisCell.className = 'hinweis-cell'; hinweisCell.dataset.productIndex = productIndex; hinweisCell.style.cursor = 'pointer'; hinweisCell.innerHTML = `<div class="hinweis-text">${escapeHtml(hinweisData[productIndex] || '')}</div>`; hinweisCell.addEventListener('click', (e) => { e.stopPropagation(); openHinweisModal(productIndex); }); row.appendChild(hinweisCell); tbody.appendChild(row); }); }); }
+        function onCellClick(e, cell, productIndex, column) { if (!isEditing) return; if (activeCell === cell) { clearCell(productIndex, column); cell.classList.remove('allergen-active'); activeCell = null; closeDropdown(); return; } if (activeCell) activeCell.classList.remove('allergen-active'); cell.classList.add('allergen-active'); activeCell = cell; closeDropdown(); if (dropdownOptions[column]) showDropdown(e, cell, productIndex, column, dropdownOptions[column]); else toggleSimpleCell(productIndex, column, cell); }
+        function toggleSimpleCell(productIndex, column, cell) { const key = `${productIndex}-${column}`; if (cellData[key]) { delete cellData[key]; updateCellValue(productIndex, column, ''); cell.classList.remove('allergen-selected'); } else { cellData[key] = 'X'; updateCellValue(productIndex, column, 'X'); cell.classList.add('allergen-selected'); } cell.classList.remove('allergen-active'); activeCell = null; autoSaveToFirebase(); }
+        function clearCell(productIndex, column) { const key = `${productIndex}-${column}`; delete cellData[key]; updateCellValue(productIndex, column, ''); const cell = document.querySelector(`td[data-product-index="${productIndex}"][data-column="${column}"]`); if (cell) cell.classList.remove('allergen-selected'); autoSaveToFirebase(); }
+        function showDropdown(event, cell, productIndex, column, options) { const dropdown = document.createElement('div'); dropdown.className = 'custom-dropdown'; const key = `${productIndex}-${column}`; const currentValues = cellData[key] ? cellData[key].split(',').map(v => v.trim()) : []; document.getElementById('dropdownOverlay').classList.add('show'); const header = document.createElement('div'); header.className = 'dropdown-header'; header.innerHTML = `<span>Optionen wählen</span><button class="close-btn" onclick="event.stopPropagation(); closeDropdown();">✕</button>`; dropdown.appendChild(header); options.forEach(option => { const item = document.createElement('div'); item.className = 'dropdown-item'; if (currentValues.includes(option)) item.classList.add('selected'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = option; checkbox.checked = currentValues.includes(option); const label = document.createElement('span'); label.textContent = option; item.appendChild(checkbox); item.appendChild(label); item.addEventListener('click', (e) => { e.stopPropagation(); checkbox.checked = !checkbox.checked; if (checkbox.checked) item.classList.add('selected'); else item.classList.remove('selected'); }); dropdown.appendChild(item); }); const footer = document.createElement('div'); footer.className = 'dropdown-footer'; const clearBtn = document.createElement('button'); clearBtn.className = 'dropdown-btn clear'; clearBtn.textContent = 'Alle löschen'; clearBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; cb.closest('.dropdown-item').classList.remove('selected'); }); delete cellData[key]; updateCellValue(productIndex, column, ''); cell.classList.remove('allergen-selected'); autoSaveToFirebase(); }); const closeBtn = document.createElement('button'); closeBtn.className = 'dropdown-btn close'; closeBtn.textContent = 'Fertig'; closeBtn.addEventListener('click', (e) => { e.stopPropagation(); const selected = []; dropdown.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => selected.push(cb.value)); if (selected.length > 0) { cellData[key] = selected.join(', '); updateCellValue(productIndex, column, selected.join(', ')); cell.classList.add('allergen-selected'); } else { delete cellData[key]; updateCellValue(productIndex, column, ''); cell.classList.remove('allergen-selected'); } closeDropdown(); autoSaveToFirebase(); }); footer.appendChild(clearBtn); footer.appendChild(closeBtn); dropdown.appendChild(footer); document.body.appendChild(dropdown); activeDropdown = dropdown; }
+        function updateCellValue(productIndex, column, value) { const contentDiv = document.getElementById(`cell-${productIndex}-${column}`); if (!contentDiv) return; contentDiv.innerHTML = ''; if (value && value !== '') { value.split(',').map(v => v.trim()).forEach(val => { const tag = document.createElement('span'); tag.className = 'value-tag'; tag.textContent = val; contentDiv.appendChild(tag); }); } }
+        function autoSaveToFirebase() { if (!firebaseInitialized || isLoading) return; if (saveTimeout) clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveToFirebase(); }, 500); }
+        async function saveToFirebase() { if (!firebaseInitialized) { console.warn("Firebase not initialized. Fallback to localStorage."); saveToLocalStorageFallback(); return; } try { const currentMonth = document.getElementById('monthSelector').value; const docRef = db.ref('temperaturkontrolle/' + currentMonth); const dataToSave = { allergens: cellData, hinweise: hinweisData, lastUpdated: new Date().toISOString() }; await docRef.set(dataToSave); console.log("✅ Data saved to Firebase RTDB for month:", currentMonth); showSaveIndicator(true); } catch (error) { console.error("❌ Error saving to Firebase RTDB:", error); showSaveIndicator(false); saveToLocalStorageFallback(); } }
+        function saveToLocalStorageFallback() { const allData = { allergens: cellData, hinweise: hinweisData }; localStorage.setItem('temperaturkontrolle_data', JSON.stringify(allData)); console.log("💾 Data saved to localStorage as fallback"); }
+        function showSaveIndicator(success) { const saveBtn = document.querySelector('.btn-success'); if (!saveBtn) return; const originalText = saveBtn.innerHTML; saveBtn.innerHTML = success ? '✓ Gespeichert!' : '⚠️ Fehler!'; setTimeout(() => { saveBtn.innerHTML = originalText; }, 1500); }
+        async function loadFromFirebase() { if (!firebaseInitialized) { console.warn("Firebase not initialized. Loading from localStorage."); loadFromLocalStorage(); return; } isLoading = true; const currentMonth = document.getElementById('monthSelector').value; try { const docRef = db.ref('temperaturkontrolle/' + currentMonth); const snapshot = await docRef.once('value'); if (snapshot.exists()) { const data = snapshot.val(); cellData = data.allergens || {}; hinweisData = data.hinweise || {}; console.log("✅ Data loaded from Firebase RTDB for month:", currentMonth); } else { cellData = {}; hinweisData = {}; console.log("ℹ️ No data found for month:", currentMonth, "starting fresh"); } refreshUIFromData(); } catch (error) { console.error("❌ Error loading from Firebase RTDB:", error); loadFromLocalStorage(); } finally { isLoading = false; } }
+        function loadFromLocalStorage() { const saved = localStorage.getItem('temperaturkontrolle_data'); if (saved) { try { const allData = JSON.parse(saved); cellData = allData.allergens || {}; hinweisData = allData.hinweise || {}; refreshUIFromData(); console.log("💾 Data loaded from localStorage as fallback"); } catch (e) { console.error('Fehler beim Laden der Daten', e); } } }
+        function refreshUIFromData() { for (let productIndex = 0; productIndex < Object.keys(productIndexMap).length; productIndex++) { for (let col = 1; col <= 15; col++) { const key = `${productIndex}-${col}`; const value = cellData[key] || ''; updateCellValue(productIndex, col, value); const cell = document.querySelector(`td[data-product-index="${productIndex}"][data-column="${col}"]`); if (cell) { if (value && value !== '') cell.classList.add('allergen-selected'); else cell.classList.remove('allergen-selected'); } } } Object.keys(hinweisData).forEach(productIndex => { updateHinweisCell(parseInt(productIndex)); }); for (let productIndex = 0; productIndex < Object.keys(productIndexMap).length; productIndex++) { if (!hinweisData[productIndex]) updateHinweisCell(productIndex); } }
+        function saveData() { saveToFirebase(); }
+        function loadSavedData() { loadFromFirebase(); }
+        function loadMonth() { const monthSelector = document.getElementById('monthSelector'); const [year, month] = monthSelector.value.split('-'); document.getElementById('pageTitle').textContent = `Temperaturkontrolle - Allergene & Zusatzstoffe (${month}.${year})`; loadFromFirebase(); }
     </script>
 </body>
 </html>
