@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Primel Eiscafé - Temperaturkontrolle</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -800,6 +803,39 @@
     </div>
 
     <script>
+        // ==================== FIREBASE KONFIGURATION ====================
+        // 🔴🔴🔴 ضع رابط Firebase API هنا (استبدل هذا الكائن بكائن التهيئة الخاص بك) 🔴🔴🔴
+        const firebaseConfig = {
+            // 🔴 انسخ والصق كائن firebaseConfig الخاص بك هنا 🔴
+            // مثال:
+            //  apiKey: "AIzaSyAf6htsYjMk2vgKg6ZWI7Wkl-e2_3f9oqs",
+  authDomain: "kellnerorder.firebaseapp.com",
+  databaseURL: "https://kellnerorder-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "kellnerorder",
+  storageBucket: "kellnerorder.firebasestorage.app",
+  messagingSenderId: "670485088629",
+  appId: "1:670485088629:web:6a34454d057e3e050b2b3c",
+  measurementId: "G-FZFN6G8FYM"
+        };
+        // 🔴🔴🔴 انتهى مكان رابط Firebase 🔴🔴🔴
+
+        // تهيئة Firebase
+        let db = null;
+        let firebaseInitialized = false;
+        
+        try {
+            if (firebaseConfig.apiKey) {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                firebaseInitialized = true;
+                console.log("✅ Firebase initialized successfully");
+            } else {
+                console.warn("⚠️ Firebase configuration missing. Please add your firebaseConfig.");
+            }
+        } catch (e) {
+            console.error("❌ Firebase initialization error:", e);
+        }
+
         // ==================== PRODUKTDATEN MIT KATEGORIEN ====================
         const categories = [
             {
@@ -859,6 +895,8 @@
         let hinweisData = {}; // Hinweis-Texte
         let editTimeout = null;
         let productIndexMap = {}; // Mapping von Produktnamen zu Index
+        let isLoading = false; // Verhindert Endlosschleife beim Laden
+        let saveTimeout = null; // Debounce für automatisches Speichern
         
         // ==================== INITIALISIERUNG ====================
         document.addEventListener('DOMContentLoaded', function() {
@@ -962,6 +1000,8 @@
                     delete hinweisData[activeHinweisProductIndex];
                 }
                 updateHinweisCell(activeHinweisProductIndex);
+                // حفظ تلقائي في Firebase بعد تغيير Hinweis
+                autoSaveToFirebase();
             }
             closeHinweisModal();
         }
@@ -1104,6 +1144,8 @@
             
             cell.classList.remove('allergen-active');
             activeCell = null;
+            // حفظ تلقائي بعد تغيير الخلية
+            autoSaveToFirebase();
         }
         
         // ==================== ZELLE LEEREN ====================
@@ -1117,6 +1159,7 @@
             if (cell) {
                 cell.classList.remove('allergen-selected');
             }
+            autoSaveToFirebase();
         }
         
         // ==================== DROPDOWN ANZEIGEN ====================
@@ -1186,6 +1229,7 @@
                 delete cellData[key];
                 updateCellValue(productIndex, column, '');
                 cell.classList.remove('allergen-selected');
+                autoSaveToFirebase();
             });
             
             const closeBtn = document.createElement('button');
@@ -1210,6 +1254,7 @@
                 }
                 
                 closeDropdown();
+                autoSaveToFirebase();
             });
             
             footer.appendChild(clearBtn);
@@ -1238,48 +1283,165 @@
             }
         }
         
-        // ==================== DATEN SPEICHERN ====================
-        function saveData() {
+        // ==================== AUTO-SAVE ZU FIREBASE (mit Debounce) ====================
+        function autoSaveToFirebase() {
+            if (!firebaseInitialized || isLoading) return;
+            
+            // Debounce: لا نحفظ في كل تغيير لحظي، ننتظر 500ms
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveToFirebase();
+            }, 500);
+        }
+        
+        // ==================== SPEICHERN ZU FIREBASE ====================
+        async function saveToFirebase() {
+            if (!firebaseInitialized) {
+                console.warn("Firebase not initialized. Data saved to localStorage as fallback.");
+                saveToLocalStorageFallback();
+                return;
+            }
+            
+            try {
+                const currentMonth = document.getElementById('monthSelector').value;
+                const docRef = db.collection("temperaturkontrolle").doc(currentMonth);
+                
+                const dataToSave = {
+                    allergens: cellData,
+                    hinweise: hinweisData,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                await docRef.set(dataToSave);
+                console.log("✅ Data saved to Firebase for month:", currentMonth);
+                showSaveIndicator(true);
+            } catch (error) {
+                console.error("❌ Error saving to Firebase:", error);
+                showSaveIndicator(false);
+                // Fallback: حفظ في localStorage
+                saveToLocalStorageFallback();
+            }
+        }
+        
+        // ==================== FALLBACK: LOCALSTORAGE ====================
+        function saveToLocalStorageFallback() {
             const allData = {
                 allergens: cellData,
                 hinweise: hinweisData
             };
             localStorage.setItem('temperaturkontrolle_data', JSON.stringify(allData));
-            alert('✅ Daten wurden gespeichert');
+            console.log("💾 Data saved to localStorage as fallback");
         }
         
-        // ==================== DATEN LADEN ====================
-        function loadSavedData() {
+        // ==================== مؤشر حفظ بسيط ====================
+        function showSaveIndicator(success) {
+            const saveBtn = document.querySelector('.btn-success');
+            if (!saveBtn) return;
+            const originalText = saveBtn.innerHTML;
+            if (success) {
+                saveBtn.innerHTML = '✓ Gespeichert!';
+            } else {
+                saveBtn.innerHTML = '⚠️ Fehler!';
+            }
+            setTimeout(() => {
+                saveBtn.innerHTML = originalText;
+            }, 1500);
+        }
+        
+        // ==================== LADEN VON FIREBASE ====================
+        async function loadFromFirebase() {
+            if (!firebaseInitialized) {
+                console.warn("Firebase not initialized. Loading from localStorage.");
+                loadFromLocalStorage();
+                return;
+            }
+            
+            isLoading = true;
+            const currentMonth = document.getElementById('monthSelector').value;
+            
+            try {
+                const docRef = db.collection("temperaturkontrolle").doc(currentMonth);
+                const doc = await docRef.get();
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    cellData = data.allergens || {};
+                    hinweisData = data.hinweise || {};
+                    console.log("✅ Data loaded from Firebase for month:", currentMonth);
+                } else {
+                    // لا توجد بيانات لهذا الشهر، نبدأ بيانات فارغة
+                    cellData = {};
+                    hinweisData = {};
+                    console.log("ℹ️ No data found for month:", currentMonth, "starting fresh");
+                }
+                
+                // تحديث الواجهة
+                refreshUIFromData();
+            } catch (error) {
+                console.error("❌ Error loading from Firebase:", error);
+                loadFromLocalStorage();
+            } finally {
+                isLoading = false;
+            }
+        }
+        
+        // ==================== LADEN VON LOCALSTORAGE (Fallback) ====================
+        function loadFromLocalStorage() {
             const saved = localStorage.getItem('temperaturkontrolle_data');
             if (saved) {
                 try {
                     const allData = JSON.parse(saved);
                     cellData = allData.allergens || {};
                     hinweisData = allData.hinweise || {};
-                    
-                    // Allergen-Daten laden
-                    Object.keys(cellData).forEach(key => {
-                        const [productIndex, column] = key.split('-').map(Number);
-                        const value = cellData[key];
-                        
-                        if (value && value !== '') {
-                            updateCellValue(productIndex, column, value);
-                            
-                            const cell = document.querySelector(`td[data-product-index="${productIndex}"][data-column="${column}"]`);
-                            if (cell) {
-                                cell.classList.add('allergen-selected');
-                            }
-                        }
-                    });
-                    
-                    // Hinweis-Daten laden
-                    Object.keys(hinweisData).forEach(productIndex => {
-                        updateHinweisCell(parseInt(productIndex));
-                    });
+                    refreshUIFromData();
+                    console.log("💾 Data loaded from localStorage as fallback");
                 } catch (e) {
                     console.error('Fehler beim Laden der Daten', e);
                 }
             }
+        }
+        
+        // ==================== تحديث الواجهة من البيانات ====================
+        function refreshUIFromData() {
+            // إعادة تعيين جميع الخلايا
+            for (let productIndex = 0; productIndex < Object.keys(productIndexMap).length; productIndex++) {
+                for (let col = 1; col <= 15; col++) {
+                    const key = `${productIndex}-${col}`;
+                    const value = cellData[key] || '';
+                    updateCellValue(productIndex, col, value);
+                    
+                    const cell = document.querySelector(`td[data-product-index="${productIndex}"][data-column="${col}"]`);
+                    if (cell) {
+                        if (value && value !== '') {
+                            cell.classList.add('allergen-selected');
+                        } else {
+                            cell.classList.remove('allergen-selected');
+                        }
+                    }
+                }
+            }
+            
+            // تحديث خلايا Hinweis
+            Object.keys(hinweisData).forEach(productIndex => {
+                updateHinweisCell(parseInt(productIndex));
+            });
+            
+            // إزالة أي خلايا Hinweis ليس لها بيانات
+            for (let productIndex = 0; productIndex < Object.keys(productIndexMap).length; productIndex++) {
+                if (!hinweisData[productIndex]) {
+                    updateHinweisCell(productIndex);
+                }
+            }
+        }
+        
+        // ==================== DATEN SPEICHERN (دالة رئيسية) ====================
+        function saveData() {
+            saveToFirebase();
+        }
+        
+        // ==================== DATEN LADEN (دالة رئيسية) ====================
+        function loadSavedData() {
+            loadFromFirebase();
         }
         
         // ==================== MONAT LADEN ====================
@@ -1288,6 +1450,8 @@
             const [year, month] = monthSelector.value.split('-');
             document.getElementById('pageTitle').textContent = 
                 `Temperaturkontrolle - Allergene & Zusatzstoffe (${month}.${year})`;
+            // تحميل بيانات الشهر الجديد من Firebase
+            loadFromFirebase();
         }
     </script>
 </body>
